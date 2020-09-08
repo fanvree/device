@@ -1,0 +1,17 @@
+git add *
+git commit -m "str"
+git pull
+git push
+
+
+我修改了device文件夹，需要上传
+git add *
+git commit -m "str"
+git pull
+git push
+
+git add .gitignore
+
+
+https://www.liaoxuefeng.com/wiki/896043488029600/896954117292416
+git clone git@github.com:fanvree/device.git
