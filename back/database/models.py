@@ -9,8 +9,8 @@ class User(models.Model):
     password = models.CharField(max_length=1000, default=None)
     email = models.CharField(max_length=64, default=None)
     contact = models.CharField(max_length=64, default=None)
-    identity = models.CharField(max_length=64, default=None)
-    apply = models.CharField(max_length=64, default=None)
+    identity = models.CharField(max_length=64, default=None)#normal owner admin
+    apply = models.CharField(max_length=64, default=None)#用户成为提供者的
     token = models.CharField(max_length=64, default=None)
 
 
@@ -35,10 +35,17 @@ class RentingOrder(models.Model):
     contact = models.TextField(max_length=64, default=None)
     start = models.DateTimeField(max_length=64, default=None)
     due = models.DateTimeField(max_length=64, default=None)
-    valid = models.CharField(max_length=64, default=None)
+    valid=models.CharField(max_length=64, default=None)
 
+class ShelfOrder(models.Model):
+    device_id = models.IntegerField(default=0)
+    owner_name = models.CharField(max_length=64, default=None)
+    reason = models.TextField(max_length=2000, default=None)
+    state = models.CharField(max_length=64, default=None)
+    start_time = models.DateTimeField(max_length=64, default=None)
 
-# class ShelfOrder(models.Model):
-#     device_id = models.IntegerField(default=0)
-#     owner_name = models.CharField(max_length=64, default=None)
-
+class ApplyOrder(models.Model):
+    user_id=models.CharField(max_length=64, default=None)
+    reason=models.TextField(max_length=2000, default=None)
+    state=models.CharField(max_length=64, default=None)
+    #failed passed waiting 默认waiting、
