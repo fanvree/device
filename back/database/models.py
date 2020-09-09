@@ -35,6 +35,7 @@ class RentingOrder(models.Model):
     contact = models.TextField(max_length=64, default=None)
     start = models.DateTimeField(max_length=64, default=None)
     due = models.DateTimeField(max_length=64, default=None)
+    valid = models.CharField(max_length=64, default=None)
 
 
 # class ShelfOrder(models.Model):
