@@ -19,13 +19,13 @@ class Device(models.Model):
     owner = models.CharField(max_length=64, default=None)
     owner_phone = models.CharField(max_length=64, default=None)
     user = models.CharField(max_length=64, default=None)
-    rent_out = models.CharField(default=False)
+    # rent_out = models.CharField(default=False)
     start = models.DateTimeField(default=datetime.datetime.now())    # TODO
     due = models.DateTimeField(default=datetime.datetime.now())
     location = models.CharField(max_length=64, default=None)
     addition = models.CharField(max_length=64, default=None)
     valid = models.CharField(max_length=64, default=None)
-    # reason = models.CharField(max_length=64, default=None)
+    reason = models.CharField(max_length=64, default=None)
 
 
 class RentingOrder(models.Model):
