@@ -332,7 +332,6 @@ Response:
 设备提供者：
 1具有普通用户权限
 2.1查询己方设备
-2.1 查看所有设备：
 Method:GET
 URL：/offer/device/mine
 QueryParam:
