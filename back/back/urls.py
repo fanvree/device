@@ -18,9 +18,11 @@ from django.urls import path
 from fzr.views import send_email
 from fzr.views import logon
 from django.conf.urls import url
+from szl import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     url(r'^sendemail$', send_email),
     url(r'^logon$', logon),
+    url(r'/boss/order/list',views.GetOrderList)
 ]
