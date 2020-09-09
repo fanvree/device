@@ -20,9 +20,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c02e0a76-cde1-42b8-b70a-82bbd5a20ad0" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/database/migrations/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/zsw/migrations/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/back/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/back/settings.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -82,7 +81,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1599615612081</updated>
-      <workItem from="1599615623380" duration="5680000" />
+      <workItem from="1599615623380" duration="9949000" />
     </task>
     <servers />
   </component>
@@ -105,22 +104,22 @@
       <screen x="0" y="0" width="1333" height="849" />
     </state>
     <state x="449" y="180" key="FileChooserDialogImpl/0.0.1333.849@0.0.1333.849" timestamp="1599631946331" />
-    <state width="1291" height="219" key="GridCell.Tab.0.bottom" timestamp="1599616605940">
+    <state width="1291" height="219" key="GridCell.Tab.0.bottom" timestamp="1599634319292">
       <screen x="0" y="0" width="1333" height="849" />
     </state>
-    <state width="1291" height="219" key="GridCell.Tab.0.bottom/0.0.1333.849@0.0.1333.849" timestamp="1599616605940" />
-    <state width="1291" height="219" key="GridCell.Tab.0.center" timestamp="1599616605940">
+    <state width="1291" height="219" key="GridCell.Tab.0.bottom/0.0.1333.849@0.0.1333.849" timestamp="1599634319292" />
+    <state width="1291" height="219" key="GridCell.Tab.0.center" timestamp="1599634319292">
       <screen x="0" y="0" width="1333" height="849" />
     </state>
-    <state width="1291" height="219" key="GridCell.Tab.0.center/0.0.1333.849@0.0.1333.849" timestamp="1599616605940" />
-    <state width="1291" height="219" key="GridCell.Tab.0.left" timestamp="1599616605940">
+    <state width="1291" height="219" key="GridCell.Tab.0.center/0.0.1333.849@0.0.1333.849" timestamp="1599634319292" />
+    <state width="1291" height="219" key="GridCell.Tab.0.left" timestamp="1599634319292">
       <screen x="0" y="0" width="1333" height="849" />
     </state>
-    <state width="1291" height="219" key="GridCell.Tab.0.left/0.0.1333.849@0.0.1333.849" timestamp="1599616605940" />
-    <state width="1291" height="219" key="GridCell.Tab.0.right" timestamp="1599616605940">
+    <state width="1291" height="219" key="GridCell.Tab.0.left/0.0.1333.849@0.0.1333.849" timestamp="1599634319292" />
+    <state width="1291" height="219" key="GridCell.Tab.0.right" timestamp="1599634319292">
       <screen x="0" y="0" width="1333" height="849" />
     </state>
-    <state width="1291" height="219" key="GridCell.Tab.0.right/0.0.1333.849@0.0.1333.849" timestamp="1599616605940" />
+    <state width="1291" height="219" key="GridCell.Tab.0.right/0.0.1333.849@0.0.1333.849" timestamp="1599634319292" />
     <state x="170" y="70" key="SettingsEditor" timestamp="1599616562020">
       <screen x="0" y="0" width="1333" height="849" />
     </state>
