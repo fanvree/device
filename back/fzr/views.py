@@ -68,4 +68,4 @@ def logon(request):
             else:
                 return JsonResponse({"error": "code is error"})
         return JsonResponse({"error": "username is exist"})
-    return JsonResponse({"error": "error"})
+    return JsonResponse({"error": "变量不够"})
