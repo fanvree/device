@@ -383,8 +383,31 @@ Response:
 
 
 2.3删除设备：
-2.4上架设备：
-2.5下架设备：
+Method:GET
+URL：/owner/device/mine
+QueryParam:
+{
+	'deviceid': '101',
+}
+Response:
+{
+	'state': '成功'/'失败' //没想好return 啥，待沟通fzr
+}
+2.4上架设备：（valid=1）
+2.5下架设备：（valid=2）
+Method:GET
+URL：/owner/device/change
+QueryParam:
+{
+	'deviceid': '101',
+	'valid':1/未审核 2/未上架 
+}
+Response:
+{
+	'state': '成功'/'失败' //没想好return 啥，待沟通fzr
+}
+
+
 3需要平台支持审核普通用户的设备租借申请，普通用户在填写必要的登
 记信息（例如用途、归还日期等，可自行设计，合理即可）之后，可以
 对尚未借出的设备申请租借，而设备提供者可以查看所有对己方设备的
