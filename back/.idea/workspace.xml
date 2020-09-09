@@ -25,6 +25,11 @@
 =======
 >>>>>>> fe633aaad4b1f22224e4546a433a6cf1910706e0
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+<<<<<<< HEAD
+      <change beforePath="$PROJECT_DIR$/back/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/back/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fzr/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/fzr/views.py" afterDir="false" />
+=======
+>>>>>>> 98118401a74d858af01a6be54832a4127be36cfe
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
