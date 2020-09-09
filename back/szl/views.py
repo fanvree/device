@@ -36,8 +36,23 @@ def GetOrderList(request):
 
             answer_list.append(part_answer)
         total = len(answer_list)
-        return JsonResponse({})
-
-
+        return JsonResponse({'total':total,'orderlist':answer_list})
     else:
         return JsonResponse({'error':'require GET'})
+
+def ChangeOrderState(request):
+    if request.method=='GET':
+        orderid=request.GET.get('orderid')
+        state=request.GET.get('state')
+
+        order=models.RentingOrder.objects.get(id=orderid)
+        if state==0:
+            order.valid='passed'
+        elif state==1:
+            order.valid='waited'
+        elif state==2:
+            order.valid='failed'
+
+        return JsonResponse({'message':'ok'})
+    else:
+        return JsonResponse({'error': 'require GET'})
