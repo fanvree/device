@@ -18,8 +18,8 @@ Response:
 			'userid': '101' //唯一id
 			'username': 'fzr18',
 			'identity': 'normal'/'renter'/'admin',
+			'contact': '188888888888'
 			'email': '12306@qq.com'
-			'password': 'md5'
 		},
 	]
 }
@@ -51,7 +51,7 @@ QueryParam:
 	'page': 1
 	'size': 20
 	'valid':0/已经上架 1/未审核 2/未上架 
-	'deviceid': '101' //设备标识符
+	# 'deviceid': '101' //设备标识符
 	'devicename': '设备名称' //可选
 }
 Response:
@@ -64,11 +64,10 @@ Response:
 		'owner': 'fzr18',
 		'phone': '188888888888'//owner's phone
 		'user': 'yxr18',
-		'rentout': 'True'/'False',
 		'start': '2018年1月1日',  //借用开始时间
 		'due': '2018年1月1日',  //借用结束时间
 		'location': '东主楼',
-		'addtion': '备注'
+		'addition': '备注'
 		'vaild'： 0/已经上架 1/未审核 2/未上架 
 		'reason': '上架理由'
 	}
@@ -113,6 +112,7 @@ QueryParam:
 {
 	'page': 1
 	'size': 20
+	'valid':'none','passed','failed','waited'
 }
 Response:
 {
@@ -186,12 +186,10 @@ Method:GET
 URL: /boss/device/filter
 QueryParam:
 {
-	'available': True/False,	# 上架且可用的 false表示filter不包含该选项
-	'unavailable': True/False,	# 未上架
-	'rented': True/False,	# 上架且被占用
+	'valid':'none',...
 	'devicename': '',
 	'owner':'',
-	'applicant':'',
+	'user':'',
 }
 Response:{}
 
@@ -202,7 +200,7 @@ Response:{}
 学院师生：
 1.1发送邮件：
 Method:GET//后台存储email<->验证码关系
-URL：/sendemail
+URL：/logon
 QueryParam:{
 	'email':'12306@qq.com'
 }
@@ -259,11 +257,12 @@ Response:
 		'owner': 'fzr18',
 		'phone': '188888888888'//owner's phone
 		'user': 'yxr18',
-		'rentout': 'True'/'False',
 		'start': '2018年1月1日',  //借用开始时间
 		'due': '2018年1月1日',  //借用结束时间
 		'location': '东主楼',
-		'addtion': '备注'
+		'addtion': '备注',
+		'valid': 'none', ...
+		'reason':...
 	}
 	]
 }
@@ -278,7 +277,7 @@ QueryParam:
 
 4用户查看借设备记录
 Method:GET
-URL：/user/device/history
+URL：/user/order/history
 QueryParam:
 {
 	'page': 1
@@ -318,11 +317,13 @@ Response:
 		'orderid': '1' //申请唯一标识id
 		'devicename': '自动机',
 		'owner': 'fzr18',
-		'applicant': 'yxr18',
+		'user': 'yxr18',
 		'start':'2018年1月1日',
 		'due': '2018年1月1日',  //借用结束时间，前端对即将到期的设备给出提示
 		'location': '东主楼',
-		'addtion': '备注',
+		'addition': '备注',
+		'valid':
+		'reason':
 	}
 	]
 }
