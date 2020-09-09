@@ -333,7 +333,7 @@ Response:
 1具有普通用户权限
 2.1查询己方设备
 Method:GET
-URL：/offer/device/mine
+URL：/owner/device/mine
 QueryParam:
 {
 	'page': 1
@@ -364,7 +364,7 @@ Response:
 
 2.2增加己方设备
 Method:POST
-URL：/offer/device/add
+URL：/owner/device/add
 Request:{
 	'devicelist':[
 	{
