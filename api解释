@@ -332,6 +332,37 @@ Response:
 设备提供者：
 1具有普通用户权限
 2.1查询己方设备
+2.1 查看所有设备：
+Method:GET
+URL：/offer/device/mine
+QueryParam:
+{
+	'page': 1
+	'size': 20
+	'valid':0/已经上架 1/未审核 2/未上架 
+	# 'deviceid': '101' //设备标识符
+	'devicename': '设备名称' //可选
+}
+Response:
+{
+	'total':'101',
+	'devicelist':[
+	{
+		'deviceid': '1' //设备唯一标识id
+		'devicename': '自动机',
+		'owner': 'fzr18',
+		'phone': '188888888888'//owner's phone
+		'user': 'yxr18',
+		'start': '2018年1月1日',  //借用开始时间
+		'due': '2018年1月1日',  //借用结束时间
+		'location': '东主楼',
+		'addition': '备注'
+		'vaild'： 0/已经上架 1/未审核 2/未上架 
+		'reason': '上架理由'
+	}
+	]
+}
+
 2.2增加己方设备
 2.3删除设备：
 2.4上架设备：
