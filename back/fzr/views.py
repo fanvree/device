@@ -10,6 +10,8 @@ import time
 from django.core.mail import send_mail
 from django.conf import settings
 from database.models import User
+from database.models import Device
+from database.models import RentingOrder
 
 
 def send_register_email(to, code):
@@ -69,3 +71,62 @@ def logon(request):
                 return JsonResponse({"error": "code is error"})
         return JsonResponse({"error": "username is exist"})
     return JsonResponse({"error": "变量不够"})
+
+
+def owner_mine(request):
+    page = 1
+    size = 10
+    valid = -1
+    device_name = ''
+    if 'page' in request.GET:
+        page = int(request.GET['page'])
+    if 'size' in request.GET:
+        size = int(request.GET)
+    if 'valid' in request.GET:
+        valid = int(request.GET['valid'])
+    if 'devicename' in request.GET:
+        device_name = int(request.GET['devicename'])
+    show_list = Device.objects.all()
+    total = 0
+    ret_list = []
+    for item in show_list:
+        if (valid == -1 or valid == item.valid) and (device_name == "" or item.device_name.find(device_name) != -1) \
+                and item.owner == request.session['username']:
+            total += 1
+            if ((page - 1) * size < total) and (total < page * size):
+                ret_list.append({
+                    'deviceid': item.id,
+                    'devicename': item.device_name,
+                    'owner': item.owner,
+                    'phone': item.owner_phone,
+                    'user': item.user,
+                    'start': item.start,
+                    'due': item.due,
+                    'location': item.location,
+                    'addition': item.addition,
+                    'valid': item.valid,
+                    # 'reason': item.reason,
+                })
+    return JsonResponse(ret_list)
+
+
+def owner_device_add(request):
+    if 'devicelist' in request.POST:
+        device_list = request.POST['devicelist']
+        for item in device_list:
+            if request.POST['owner']:
+                device = Device()
+                device.device_name = request.POST['devicename']
+                device.owner = request.POST['owner']
+                device.owner_phone = request.POST['ownerphone']
+                device.user = ''
+                device.start = None
+                device.due = None
+                device.location = request.POST['location']
+                device.addition = request.POST['addition']
+                device.valid = '1'
+                device.reason = request.POST['reason']
+                device.save()
+
+
+
