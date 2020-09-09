@@ -13,7 +13,7 @@ from django.conf import settings
 
 def send_register_email(to, code):
     title = "注册激活链接"
-    body = "请点击下面的链接激活你的账号: http://127.0.0.1:8000/active/{0}".format(code)
+    body = "你的验证码是: {0}".format(code)
     print(body)
     send_mail(title, body, settings.DEFAULT_FROM_EMAIL, [to])
 
@@ -45,3 +45,6 @@ def send_email(request):
             return JsonResponse({'ok': 'ok'})
     return JsonResponse({'error': 'error'})
 
+
+def logon(request):
+    return JsonResponse({"1": "1"})
