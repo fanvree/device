@@ -363,6 +363,26 @@ Response:
 }
 
 2.2增加己方设备
+Method:POST
+URL：/offer/device/add
+Request:{
+	'devicelist':[
+	{
+		'devicename': '自动机',
+		'owner': 'fzr18',
+		'phone': '188888888888'//owner's phone
+		'location': '东主楼',
+		'addition': '备注'
+		'reason': '上架理由'
+	}
+	]
+}
+Response:
+{
+	'state': '成功'/'失败' //没想好return 啥，待沟通fzr
+}
+
+
 2.3删除设备：
 2.4上架设备：
 2.5下架设备：
