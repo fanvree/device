@@ -38,7 +38,7 @@ Method:POST
 URL：/boss/user/set
 Request:
 {
-	'username': name,
+	'userid': '101',
 	'identity': 'normal'/'renter'/'admin',
 }
 Response:{}
