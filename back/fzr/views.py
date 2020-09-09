@@ -9,6 +9,7 @@ from django.contrib.auth.hashers import make_password, check_password
 import time
 from django.core.mail import send_mail
 from django.conf import settings
+from database.models import User
 
 
 def send_register_email(to, code):
@@ -47,4 +48,24 @@ def send_email(request):
 
 
 def logon(request):
-    return JsonResponse({"1": "1"})
+    if ('username' in request.POST) and ('email' in request.POST) and ('code' in request.POST) and ('password' in request.POST):
+        username = request.POST['username']
+        if not (User.objects.filter(username=username).exists()):
+            email = request.POST['email']
+            code = request.POST['code']
+            password = request.POST['password']
+            if str(gen_code(email)) == str(code):
+                user = User()
+                user.username = username
+                user.password = make_password(password)
+                user.email = email
+                user.contact = "4008823823"
+                user.identity = "normal"
+                user.apply = "False"
+                user.token = ""
+                user.save()
+                return JsonResponse({"success": "add into user list"})
+            else:
+                return JsonResponse({"error": "code is error"})
+        return JsonResponse({"error": "username is exist"})
+    return JsonResponse({"error": "error"})
