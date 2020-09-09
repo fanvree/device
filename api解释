@@ -202,7 +202,7 @@ Response:{}
 学院师生：
 1.1发送邮件：
 Method:GET//后台存储email<->验证码关系
-URL：/logon
+URL：/sendemail
 QueryParam:{
 	'email':'12306@qq.com'
 }
