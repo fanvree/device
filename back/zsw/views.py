@@ -6,7 +6,7 @@ from database import models
 # Create your views here.
 # def login(request):
 #     if request.method == 'POST':
-#         username = 
+#         username =
 
 
 def get_user_info(request):         # for admin
