@@ -369,7 +369,6 @@ Request:{
 	'devicelist':[
 	{
 		'devicename': '自动机',
-		'owner': 'fzr18',
 		'phone': '188888888888'//owner's phone
 		'location': '东主楼',
 		'addition': '备注'
