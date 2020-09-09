@@ -56,3 +56,14 @@ def ChangeOrderState(request):
         return JsonResponse({'message':'ok'})
     else:
         return JsonResponse({'error': 'require GET'})
+
+def DeleteOrder(request):
+    if request.method=='POST':
+        orderid=request.POST.get('orderid')
+        order=models.RentingOrder.objects.get(id=orderid)
+        if order:
+            order.delete()
+        else:
+            return JsonResponse({'error':'order does not exist'})
+    else:
+        return JsonResponse({'error': 'require POST'})

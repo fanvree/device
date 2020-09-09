@@ -25,5 +25,6 @@ urlpatterns = [
     url(r'^sendemail$', send_email),
     url(r'^logon$', logon),
     url(r'/boss/order/list',views.GetOrderList),
-    url(r'/boss/order/state',views.ChangeOrderState)
+    url(r'/boss/order/state',views.ChangeOrderState),
+    url(r'/boss/order/delete',views.DeleteOrder)
 ]
