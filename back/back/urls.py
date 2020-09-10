@@ -17,6 +17,11 @@ from django.contrib import admin
 from django.urls import path
 from fzr.views import send_email
 from fzr.views import logon
+from fzr.views import owner_mine
+from fzr.views import owner_device_add
+from fzr.views import owner_device_change
+from fzr.views import owner_order_list
+from fzr.views import owner_device_order_change
 from django.conf.urls import url
 from szl import views
 
@@ -33,4 +38,12 @@ urlpatterns = [
     url(r'/boss/shelf/list',views.GetShelfList),
     url(r'/boss/shelf/state',views.ChangeShelfState),
     url(r'/boss/shelf/delete',views.DeleteShelf)
+    url(r'^/boss/order/list$', views.GetOrderList),
+    url(r'^/boss/order/state$', views.ChangeOrderState),
+    url(r'^/boss/order/delete$', views.DeleteOrder),
+    url(r'^/owner/device/mine$', owner_mine),
+    url(r'^/owner/device/add$', owner_device_add),
+    url(r'^/owner/device/change$', owner_device_change),
+    url(r'^/owner/device/order$', owner_order_list),
+    url(r'^/owner/device/order/change$', owner_device_order_change)
 ]
