@@ -154,6 +154,7 @@ def GetShelfList(request):#得到设备上架请求列表
             part_answer['location']=device.location
             part_answer['addition']=device.addition
             part_answer['reason']=shelf.reason
+            part_answer['state']=shelf.state
 
             answer_list.append(part_answer)
         total=len(answer_list)
@@ -164,8 +165,12 @@ def GetShelfList(request):#得到设备上架请求列表
 def ChangeShelfState(request):#状态变化请求
     if request.method=='GET':
         shelfid=request.GET.get('shelfid')
-        state=request.GET.get('state')
+        state=int(request.GET.get('state'))
+        if not models.ShelfOrder.objects.filter(id=shelfid).exists():
+            return JsonResponse({"error": "no exists"})
         shelf=models.ShelfOrder.objects.get(id=shelfid)
+        if not models.Device.objects.filter(id=shelf.device_id).exists():
+            return JsonResponse({"error": "no exists"})
         device=models.Device.objects.get(id=shelf.device_id)
         if state==0:
             shelf.state='passed'
@@ -178,6 +183,8 @@ def ChangeShelfState(request):#状态变化请求
             device.valid='off_shelf'#如果被拒绝，下架状态
         else:
             pass
+        shelf.save()
+        device.save()
         return JsonResponse({'message':'ok'})
     else:
         return JsonResponse({'error':'require GET'})
@@ -185,13 +192,13 @@ def ChangeShelfState(request):#状态变化请求
 def DeleteShelf(request):#删除上架申请
     if request.method=='POST':
         shelfid=request.POST.get('shelfid')
+        if not models.ShelfOrder.objects.filter(id=shelfid).exists():
+            return JsonResponse({'error': 'no shelfid'})
         shelf=models.ShelfOrder.objects.get(id=shelfid)
         shelf.delete()
         return JsonResponse({'message':'ok'})
     else:
         return JsonResponse({'error':'require POST'})
-
-
 
 
 
