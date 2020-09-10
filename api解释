@@ -50,7 +50,7 @@ QueryParam:
 {
 	'page': 1
 	'size': 20
-	'valid':0/已经上架 1/未审核 2/未上架 
+	'valid':0/已经上架但未外借 1/未审核 2/未上架 3/已外借
 	# 'deviceid': '101' //设备标识符
 	'devicename': '设备名称' //可选
 }
@@ -68,7 +68,7 @@ Response:
 		'due': '2018年1月1日',  //借用结束时间
 		'location': '东主楼',
 		'addition': '备注'
-		'vaild'： 0/已经上架 1/未审核 2/未上架 
+		'valid':0/已经上架但未外借 1/未审核 2/未上架 3/已外借
 		'reason': '上架理由'
 	}
 	]
@@ -89,7 +89,7 @@ Request:
 	'due': '2018年1月1日',  //借用结束时间
 	'location': '东主楼',
 	'addtion': '备注',
-	'vaild'： 0/已经上架 1/未审核 2/未上架 
+	'valid':0/已经上架但未外借 1/未审核 2/未上架 3/已外借
 	'reason': '上架理由'
 }
 Response:
@@ -322,7 +322,7 @@ Response:
 		'due': '2018年1月1日',  //借用结束时间，前端对即将到期的设备给出提示
 		'location': '东主楼',
 		'addition': '备注',
-		'valid':
+		'valid':0/已经上架但未外借 1/未审核 2/未上架 3/已外借
 		'reason':
 	}
 	]
@@ -356,7 +356,7 @@ Response:
 		'due': '2018年1月1日',  //借用结束时间
 		'location': '东主楼',
 		'addition': '备注'
-		'vaild'： 0/已经上架 1/未审核 2/未上架 
+		'valid':0/已经上架但未外借 1/未审核 2/未上架 3/已外借
 		'reason': '上架理由'
 	}
 	]
@@ -390,7 +390,7 @@ URL：/owner/device/change
 QueryParam:
 {
 	'deviceid': '101',
-	'valid':1/未审核 2/未上架 3/删除
+	'valid':0/已经上架但未外借 1/未审核 2/未上架 3/已外借 4/删除
 }
 Response:
 {
