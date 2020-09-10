@@ -459,6 +459,7 @@ QueryParam:
 {
 	page:1
 	size:10
+	rentstate:-1
 }
 {
 	total: '101'
