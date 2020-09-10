@@ -424,6 +424,44 @@ Response:
 	]
 }
 
+6 用户申请成为设备提供者
+Method:POST
+URL：/user/apply
+Request:
+{
+    'userid': '101'
+    'reason': ''
+}
+Response:
+{
+    'message': 'ok'
+}
+
+7 用户查看某一台设备的预约信息(点击某设备，得到这个设备各项信息 以及各时段被预约的情况)
+Method: GET
+URL: /user/device/reserved
+QueryParam:
+{
+    'deviceid':'101'
+}
+Response:
+{
+    'devicename': '自动机',
+    'owner': 'fzr18',
+    'location': '东主楼',
+    'addition': '备注',
+    'valid':
+    'reason':
+    'orderlist':[
+        {
+            'user':'',
+            'start':'',
+            'due':'',
+            'contact':''
+        }
+    ]
+}
+
 ################################################ FZR(以下全为fzr)
 设备提供者：
 1具有普通用户权限
