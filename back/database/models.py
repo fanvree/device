@@ -36,7 +36,7 @@ class RentingOrder(models.Model):
     start = models.DateTimeField(max_length=64, default=None)
     due = models.DateTimeField(max_length=64, default=None)
     valid = models.CharField(max_length=64, default=None)
-    rent_state = models.CharField(max_length=64, default=None)
+    rent_state = models.CharField(max_length=64, default='0')
     rent_start = models.DateTimeField(max_length=64, default=None)
     rent_end = models.DateTimeField(max_length=64, default=None)
 
