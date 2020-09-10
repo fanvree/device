@@ -227,14 +227,48 @@ Response:{}
 
 ################################################ SZL
 6、上架设备审核
-通过2筛选未上架和未审核设备，admin在其页面提交是否通过审核
-Method:POST
-URL: /boss/device/audit
-Request:{
-	'audit': True/False,
-	'commit': ''# 具体回复
+6、上架设备审核
+6.1 管理员查看设备提供者设备上架申请
+Method:GET
+URL:/boss/shelf/list
+Request:
+{
+	#'page':'1',
+	#'size':'20',
+	'state':'waiting'/'passed'/'failed'/'none'
+}
+Response:
+{
+	'total':101,
+	'shelflist':[
+	{
+		'shelfid': 1 ,//申请唯一标识id
+		'ownername':'hahaha',//设备拥有者名字
+		'devicename':'zidongji',//设备的名字
+		'location':'东主楼',//设备所在地点
+		'addition':'设备的备注，或者说是详细信息',
+		'reason': '申请理由',
+	}
+	]
+}
+6.2 设备上架申请 审批
+Method:GET
+URL：/boss/shelf/state
+QueryParam:
+{
+	'shelfid': 1,
+	'state': 0/审核通过 1/未审核 2/审核未通过
 }
 Response:{}
+6.3 删除设备上架申请
+Method:POST
+URL：/boss/shelf/delete
+Request:
+{
+	'shelfid': '1',
+}
+Response:{}
+
 ################################################ SZL
 7、统计信息？再说吧
 Method:GET
