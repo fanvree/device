@@ -19,8 +19,6 @@ URL：/boss/user/list
 QueryParam:
 {
 	'username': name(default ='')
-	'page': 1
-	'size': 20
 }
 Response:
 {
@@ -175,19 +173,7 @@ Response:{}
 
 ################################################ SZL
 5、用户申请成为设备提供者列表查看：
-5.1 用户申请成为设备提供者
-Method:POST
-URL：/boss/offer/apply
-Request:
-{
-	'userid': '101',
-	'reason': '',
-}
-Response:
-{
-	
-}
-5.2 查看设备提供者申请列表
+5.1 查看设备提供者申请列表
 Method:GET
 URL:/boss/offer/list
 Request:
@@ -206,7 +192,7 @@ Response:
 		'reason': '申请理由',
 	}
 }
-5.3 提供者申请审批:
+5.2 提供者申请审批:
 Method:GET
 URL：/boss/offer/state
 QueryParam:
@@ -216,7 +202,7 @@ QueryParam:
 }
 Response:{}
 
-5.4 删除租借申请：
+5.3 删除租借申请：
 Method:POST
 URL：/boss/offer/delete
 Request:
@@ -226,7 +212,6 @@ Request:
 Response:{}
 
 ################################################ SZL
-6、上架设备审核
 6、上架设备审核
 6.1 管理员查看设备提供者设备上架申请
 Method:GET
