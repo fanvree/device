@@ -543,6 +543,7 @@ QueryParam:
 	total: '101'
 	'devicelist':[
 	{
+		'deviceid': '1'
 		'orderid': '1' //申请唯一标识id
 		'devicename': '自动机',
 		'owner': 'fzr18',
