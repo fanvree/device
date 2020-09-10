@@ -50,7 +50,7 @@ QueryParam:
 {
 	'page': 1
 	'size': 20
-	'valid':0/已经上架但未外借 1/未审核 2/未上架 3/已外借
+	'valid':none/已经上架但未外借 on_shelf/未上架 off_shelf/已外借 renting/正在申请 on_order
 	# 'deviceid': '101' //设备标识符
 	'devicename': '设备名称' //可选
 }
