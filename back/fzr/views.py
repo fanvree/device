@@ -48,8 +48,8 @@ def send_email(request):
         mail = request.GET['email']
         if validate_email(mail):
             send_register_email(mail, gen_code(mail))
-            return JsonResponse({'ok': 'ok'})
-    return JsonResponse({'error': 'error'})
+            return JsonResponse({'state': '1'})
+    return JsonResponse({'state': '0'})
 
 
 # 完成注册
