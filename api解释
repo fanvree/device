@@ -248,6 +248,7 @@ Response:
 		'location':'东主楼',//设备所在地点
 		'addition':'设备的备注，或者说是详细信息',
 		'reason': '申请理由',
+		'state': 'on_order'
 	}
 	]
 }
