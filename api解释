@@ -496,7 +496,14 @@ QueryParam:
 # 改变orderid订单状态：state 0/审核通过 1/未审核 2/审核未通过
 # 'rentstate': 0/审核通过，未借出   1/已经借出  2/已经归还 的情况
 
-
+Method:GET
+URL：/owner/device/order/change
+QueryParam:
+{
+	orderid:'101',
+	state: 可选
+	rentstate： 可选
+}
 
 
 
