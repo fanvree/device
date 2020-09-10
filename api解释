@@ -324,7 +324,7 @@ QueryParam:
 }
 
 ################################################ ZSW
-4用户查看借设备记录
+4用户查看借设备“申请”的记录
 Method:GET
 URL：/user/order/history
 QueryParam:
@@ -335,16 +335,16 @@ QueryParam:
 Response:
 {
 	'total':'101',
-	'devicelist':[
+	'orderlist':[
 	{
 		'orderid': '1' //申请唯一标识id
 		'devicename': '自动机',
 		'owner': 'fzr18',
-		'applicant': 'yxr18',
+		'user': 'yxr18',
 		'start':'2018年1月1日',
 		'due': '2018年1月1日',  //借用结束时间
 		'location': '东主楼',
-		'addtion': '备注',
+		'addition': '备注',
 		'state': 0/审核通过 1/未审核 2/审核未通过 
 	}
 	]
