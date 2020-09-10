@@ -154,23 +154,56 @@ Response:{}
 4、用户注册：
 
 5、用户申请成为设备提供者列表查看：
+5.1 用户申请成为设备提供者
 Method:POST
-URL：/boss/offer
+URL：/boss/offer/apply
 Request:
 {
 	'userid': '101',
-	'labinfo': '',
 	'reason': '',
 }
 Response:
 {
-	# offer:[
-	# {
-	# 	'userid': '101',
-	# 	'reason': 'reason',
-	# }
-	# ]
+	
 }
+5.2 查看设备提供者申请列表
+Method:GET
+URL:/boss/offer/list
+Request:
+{
+	'page':'1',
+	'size':'20',
+	'state':'waiting'/'none'
+}
+Response:
+{
+	'total':101,
+	'offerlist':[
+	{
+		'offerid': 1 //申请唯一标识id
+		'applicant': 'yxr18',#申请者
+		'reason': '申请理由',
+	}
+}
+5.3 提供者申请审批:
+Method:GET
+URL：/boss/offer/state
+QueryParam:
+{
+	'offerid': 1,
+	'state': 0/审核通过 1/未审核 2/审核未通过
+}
+Response:{}
+
+5.4 删除租借申请：
+Method:POST
+URL：/boss/offer/delete
+Request:
+{
+	'offerid': '1',
+}
+Response:{}
+
 
 6、上架设备审核
 通过2筛选未上架和未审核设备，admin在其页面提交是否通过审核

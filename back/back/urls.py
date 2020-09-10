@@ -26,5 +26,9 @@ urlpatterns = [
     url(r'^logon$', logon),
     url(r'/boss/order/list',views.GetOrderList),
     url(r'/boss/order/state',views.ChangeOrderState),
-    url(r'/boss/order/delete',views.DeleteOrder)
+    url(r'/boss/order/delete',views.DeleteOrder),
+    url(r'/boss/offer/apply',views.ApplyForOffer),
+    url(r'/boss/offer/list',views.GetOfferList),
+    url(r'/boss/offer/state',views.ChangeOfferState),
+    url(r'/boss/offer/delete',views.DeleteOffer)
 ]
