@@ -382,17 +382,7 @@ Response:
 }
 
 
-2.3删除设备：
-Method:GET
-URL：/owner/device/mine
-QueryParam:
-{
-	'deviceid': '101',
-}
-Response:
-{
-	'state': '成功'/'失败' //没想好return 啥，待沟通fzr
-}
+2.3删除设备：（valid=3）
 2.4上架设备：（valid=1）
 2.5下架设备：（valid=2）
 Method:GET
@@ -400,7 +390,7 @@ URL：/owner/device/change
 QueryParam:
 {
 	'deviceid': '101',
-	'valid':1/未审核 2/未上架 
+	'valid':1/未审核 2/未上架 3/删除
 }
 Response:
 {
