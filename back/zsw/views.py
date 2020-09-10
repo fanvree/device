@@ -131,9 +131,6 @@ def get_device(request):
             d['devicename'] = device.device_name
             d['owner'] = device.owner
             d['phone'] = device.owner_phone
-            d['user'] = device.user
-            d['start'] = device.start
-            d['due'] = device.due
             d['location'] = device.location
             d['addition'] = device.addition
             d['valid'] = device.valid
@@ -161,9 +158,6 @@ def edit_device(request):
         d['device_name'] = request.POST.get('devicename')
         d['owner'] = request.POST.get('owner')
         d['phone'] = request.POST.get('phone')
-        d['user'] = request.POST.get('user')
-        d['start'] = request.POST.get('start')
-        d['due'] = request.POST.get('due')
         d['location'] = request.POST.get('location')
         d['addition'] = request.POST.get('addition')
         d['valid'] = request.POST.get('valid')
@@ -211,9 +205,6 @@ def get_shelf_device(request):
             d['devicename'] = device.device_name
             d['owner'] = device.owner
             d['phone'] = device.owner_phone
-            d['user'] = device.user
-            d['start'] = device.start
-            d['due'] = device.due
             d['location'] = device.location
             d['addition'] = device.addition
             d['valid'] = device.valid
@@ -282,7 +273,7 @@ def get_order_history(request):
             o['orderid'] = order.id
             o['devicename'] = device.device_name
             o['owner'] = device.owner
-            o['user'] = device.user
+            o['user'] = order.username
             o['start'] = order.start
             o['due'] = order.due
             o['location'] = device.location
@@ -308,9 +299,6 @@ def get_self_rented_device(request):
             d['devicename'] = device.device_name
             d['owner'] = device.owner
             d['phone'] = device.owner_phone
-            d['user'] = device.user
-            d['start'] = device.start
-            d['due'] = device.due
             d['location'] = device.location
             d['addition'] = device.addition
             d['valid'] = device.valid
