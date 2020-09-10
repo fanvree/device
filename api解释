@@ -68,7 +68,7 @@ Response:
 		'due': '2018年1月1日',  //借用结束时间
 		'location': '东主楼',
 		'addition': '备注'
-		'valid':0/已经上架但未外借 1/未审核 2/未上架 3/已外借
+		'valid':none/已经上架但未外借 on_shelf/未上架 off_shelf/已外借 renting/正在申请 on_order
 		'reason': '上架理由'
 	}
 	]
