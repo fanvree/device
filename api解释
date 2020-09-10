@@ -84,7 +84,7 @@ Response:
 		'due': '2018年1月1日',  //借用结束时间
 		'location': '东主楼',
 		'addition': '备注'
-		'valid':0/已经上架但未外借 1/未审核 2/未上架 3/已外借
+		'valid':english
 		'reason': '上架理由'
 	}
 	]
@@ -101,12 +101,11 @@ Request:
 	'owner': 'fzr18',
 	'phone': '188888888888'
 	'user': 'yxr18',
-	'rentout': 'True'/'False',
 	'start': '2018年1月1日',  //借用开始时间
 	'due': '2018年1月1日',  //借用结束时间
 	'location': '东主楼',
 	'addtion': '备注',
-	'valid':0/已经上架但未外借 1/未审核 2/未上架 3/已外借
+	'valid':english
 	'reason': '上架理由'
 }
 Response:
