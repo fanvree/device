@@ -17,6 +17,11 @@ from django.contrib import admin
 from django.urls import path
 from fzr.views import send_email
 from fzr.views import logon
+from fzr.views import owner_mine
+from fzr.views import owner_device_add
+from fzr.views import owner_device_change
+from fzr.views import owner_order_list
+from fzr.views import owner_device_order_change
 from django.conf.urls import url
 from szl import views
 from zsw.views import login
@@ -39,7 +44,6 @@ urlpatterns = [
     url(r'/boss/order/list', views.GetOrderList),
     url(r'/boss/order/state', views.ChangeOrderState),
     url(r'/boss/order/delete', views.DeleteOrder),
-    url(r'/boss/offer/apply', views.ApplyForOffer),
     url(r'/boss/offer/list', views.GetOfferList),
     url(r'/boss/offer/state', views.ChangeOfferState),
     url(r'/boss/offer/delete', views.DeleteOffer),
@@ -55,4 +59,9 @@ urlpatterns = [
     url(r'user/device/lend', order_device),
     url(r'user/order/history', get_order_history),
     url(r'user/device/own', get_self_rented_device),
+    url(r'^/owner/device/mine$', owner_mine),
+    url(r'^/owner/device/add$', owner_device_add),
+    url(r'^/owner/device/change$', owner_device_change),
+    url(r'^/owner/device/order$', owner_order_list),
+    url(r'^/owner/device/order/change$', owner_device_order_change)
 ]

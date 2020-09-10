@@ -5,12 +5,13 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from database import models
 
-def GetOrderList(request):
+def GetOrderList(request): #获得用户租借申请的列表
     if request.method == 'GET':
         page = request.GET.get('page')
         size = request.GET.get('size')
         valid = request.GET.get('valid')
         answer_list = []  #最终返回的列表
+        #order_list，根据valid信息取出来RentingOrder列表
         if valid == 'passed':
             order_list = models.RentingOrder.objects.filter(valid='passed')
         elif valid == 'failed':
@@ -20,6 +21,7 @@ def GetOrderList(request):
         else:
             order_list = models.RentingOrder.objects.all()
 
+        #根据页数和个数得到相应的RentingOrder，再转成字典、压入列表
         for i in range((page-1)*size,page*size):
             order=order_list[i]
             device=models.Device.objects.get(id=order.device_id)
@@ -40,15 +42,19 @@ def GetOrderList(request):
     else:
         return JsonResponse({'error':'require GET'})
 
-def ChangeOrderState(request):
+def ChangeOrderState(request): #改变RentingOrder的状态
     if request.method=='GET':
         orderid=request.GET.get('orderid')
         state=request.GET.get('state')
 
         order=models.RentingOrder.objects.get(id=orderid)
-        if state==0:
+        device=models.Device.objects.get(id=order.device_id)
+
+        if state==0:#改变device的valid和user
             order.valid='passed'
-        elif state==1:
+            device.valid='renting'
+            device.user=order.username
+        elif state==1:#如果是等待或者失败则不更改device的状态
             order.valid='waiting'
         elif state==2:
             order.valid='failed'
@@ -57,7 +63,7 @@ def ChangeOrderState(request):
     else:
         return JsonResponse({'error': 'require GET'})
 
-def DeleteOrder(request):
+def DeleteOrder(request):#删除RentingOrder。所做的操作只是删除
     if request.method=='POST':
         orderid=request.POST.get('orderid')
         order=models.RentingOrder.objects.get(id=orderid)
@@ -65,15 +71,6 @@ def DeleteOrder(request):
             order.delete()
         else:
             return JsonResponse({'error':'order does not exist'})
-    else:
-        return JsonResponse({'error': 'require POST'})
-
-def ApplyForOffer(request):
-    if request.method=='POST':
-        userid=request.POST.get('userid')
-        reason=request.POST.get('reason')
-        models.ApplyOrder.objects.create(user_id=userid,reason=reason,state='waiting')
-        return  JsonResponse({'message':'ok'})
     else:
         return JsonResponse({'error': 'require POST'})
 
@@ -92,7 +89,7 @@ def GetOfferList(request):#查看设备提供者申请列表
         size=request.GET.get('size')
         answer_list=[]
         for i in range((page-1)*size,page*size):
-            if (i < len(offer_list) ):
+            if (i < len(offer_list) ):#由page和size确定的区间内进行访问
                 offer=offer_list[i]
                 part_answer={}
                 part_answer['offerid']=offer.id
@@ -105,14 +102,15 @@ def GetOfferList(request):#查看设备提供者申请列表
     else:
         return JsonResponse({'error': 'require GET'})
 
-def ChangeOfferState(request):
+def ChangeOfferState(request):#改变用户申请成为设备提供者的状态，
     if request.method=='GET':
         offerid=request.GET.get('offerid')
         state=request.GET.get('state')
-        offer=models.ApplyOrder.get(id=offerid)
-
-        if state==0:
+        offer=models.ApplyOrder.objects.get(id=offerid)
+        user=models.User.objects.get(id=offer.user_id)
+        if state==0:#改变user的identitiy
             offer.state='passed'
+            user.identity='admin'
         elif state==1:
             offer.state='waiting'
         elif state==2:
@@ -124,7 +122,7 @@ def ChangeOfferState(request):
     else:
         return JsonResponse({'error': 'require GET'})
 
-def DeleteOffer(request):
+def DeleteOffer(request):#删除用户成为设备提供者的申请
     if request.method=='POST':
         offerid=request.POST.get('offerid')
         offer=models.ApplyOrder.get(id=offerid)
@@ -132,6 +130,72 @@ def DeleteOffer(request):
         return JsonResponse({})
     else:
         return JsonResponse({'error': 'require POST'})
+
+def GetShelfList(request):#得到设备上架请求列表
+    if request.method=='GET':
+        page=request.GET.get('page')
+        size=request.GET.get('size')
+        state=request.GET.get('state')
+
+        if state=='waiting':
+            tmp_shelf_list=models.ShelfOrder.objects.filter(state='waiting')
+        elif state=='passed':
+            tmp_shelf_list = models.ShelfOrder.objects.filter(state='passed')
+        elif state=='failed':
+            tmp_shelf_list = models.ShelfOrder.objects.filter(state='failed')
+        else:
+            tmp_shelf_list = models.ShelfOrder.objects.all()
+
+        answer_list=[]
+        for i in range((page-1)*size,page*size):
+            if i<len(tmp_shelf_list):
+                shelf=tmp_shelf_list[i]
+                part_answer={}
+                part_answer['shelfid']=shelf.id
+                part_answer['ownername']=shelf.owner_name
+
+                device=models.Device.objects.get(id=shelf.device_id)
+                part_answer['devicename']=device.device_name
+                part_answer['location']=device.location
+                part_answer['addition']=device.addition
+                part_answer['reason']=shelf.reason
+
+                answer_list.append(part_answer)
+        total=len(answer_list)
+        return JsonResponse({'total':total,'shelflist':answer_list})
+    else:
+        return JsonResponse({'error':'require GET'})
+
+def ChangeShelfState(request):#状态变化请求
+    if request.method=='GET':
+        shelfid=request.GET.get('shelfid')
+        state=request.GET.get('state')
+        shelf=models.ShelfOrder.objects.get(id=shelfid)
+        device=models.Device.objects.get(id=shelf.device_id)
+        if state==0:
+            shelf.state='passed'
+            device.valid='on_shelf'#如果通过，将设备的状态变为上架
+        elif state==1:
+            shelf.state='waiting'
+            device.valid='on_order'#如果还是在等待，仍然设置成on_order
+        elif state==2:
+            shelf.state='failed'
+            device.valid='off_shelf'#如果被拒绝，下架状态
+        else:
+            pass
+        return JsonResponse({'message':'ok'})
+    else:
+        return JsonResponse({'error':'require GET'})
+
+def DeleteShelf(request):#删除上架申请
+    if request.method=='POST':
+        shelfid=request.POST.get('shelfid')
+        shelf=models.ShelfOrder.objects.get(id=shelfid)
+        shelf.delete()
+        return JsonResponse({'message':'ok'})
+    else:
+        return JsonResponse({'error':'require POST'})
+
 
 
 

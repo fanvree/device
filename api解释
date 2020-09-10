@@ -1,3 +1,15 @@
+1.0查询自己信息
+Method:GET
+URL：/my
+QueryParam:
+{}
+Response:
+{
+	username:
+	userid:
+	identity:
+}
+
 学院平台助理(超级管理员)：
 
 ################################################ ZSW
@@ -324,7 +336,7 @@ QueryParam:
 }
 
 ################################################ ZSW
-4用户查看借设备记录
+4用户查看借设备“申请”的记录
 Method:GET
 URL：/user/order/history
 QueryParam:
@@ -335,16 +347,16 @@ QueryParam:
 Response:
 {
 	'total':'101',
-	'devicelist':[
+	'orderlist':[
 	{
 		'orderid': '1' //申请唯一标识id
 		'devicename': '自动机',
 		'owner': 'fzr18',
-		'applicant': 'yxr18',
+		'user': 'yxr18',
 		'start':'2018年1月1日',
 		'due': '2018年1月1日',  //借用结束时间
 		'location': '东主楼',
-		'addtion': '备注',
+		'addition': '备注',
 		'state': 0/审核通过 1/未审核 2/审核未通过 
 	}
 	]
@@ -382,13 +394,15 @@ Response:
 设备提供者：
 1具有普通用户权限
 2.1查询己方设备
+# 可以根据devicename进行筛选
+# 也可以根据valid状态筛选 0/已经上架但未外借 1/未审核 2/未上架 3/已外借
 Method:GET
 URL：/owner/device/mine
 QueryParam:
 {
 	'page': 1
 	'size': 20
-	'valid':0/已经上架 1/未审核 2/未上架 
+	'valid':0/已经上架但未外借 1/未审核 2/未上架 3/已外借
 	# 'deviceid': '101' //设备标识符
 	'devicename': '设备名称' //可选
 }
@@ -435,12 +449,13 @@ Response:
 2.3删除设备：（valid=3）
 2.4上架设备：（valid=1）
 2.5下架设备：（valid=2）
+# 改变我的设备状态valid： 0已归还 1未审核 2未上架 3已外借 4删除
 Method:GET
 URL：/owner/device/change
 QueryParam:
 {
 	'deviceid': '101',
-	'valid':0/已经上架但未外借 1/未审核 2/未上架 3/已外借 4/删除
+	'valid':
 }
 Response:
 {
@@ -453,13 +468,54 @@ Response:
 对尚未借出的设备申请租借，而设备提供者可以查看所有对己方设备的
 租借申请和申请方信息，并同意或拒绝申请，审核后对应的申请用户可
 以收到审核结果；
+
 4需要平台支持管理所有已借出设备历史信息，包括查看已借出的设备信
 息、设备的归还情况等，同时对归还的设备进行确认归还操作等等。
 
+# 查询订单列表： 可以筛选 'state': 0/审核通过 1/未审核 2/审核未通过 和
+# 'rentstate': 0/审核通过，未借出   1/已经借出  2/已经归还 的情况
+# deviceid 查看某个设备的订单
+Method:GET
+URL：/owner/device/order
+QueryParam:
+{
+	page:1
+	size:10
+	state:
+	deviceid:
+	rentstate:-1
+}
+{
+	total: '101'
+	'devicelist':[
+	{
+		'orderid': '1' //申请唯一标识id
+		'devicename': '自动机',
+		'owner': 'fzr18',
+		'applicant': 'yxr18',
+		'start':'2018年1月1日',
+		'due': '2018年1月1日',  //借用结束时间
+		'location': '东主楼',
+		'addtion': '备注',
+		'state': 0/审核通过 1/未审核 2/审核未通过 
+		'rentstate': 0/审核通过，未借出   1/已经借出   2/已经归还
+		'rentstart'：借出时间
+		'rentend：归还时间
+	}]
+}
 
 
+# 改变orderid订单状态：state 0/审核通过 1/未审核 2/审核未通过
+# 'rentstate': 0/审核通过，未借出   1/已经借出  2/已经归还 的情况
 
-
+Method:GET
+URL：/owner/device/order/change
+QueryParam:
+{
+	orderid:'101',
+	state: 可选
+	rentstate： 可选
+}
 
 
 
