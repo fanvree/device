@@ -346,3 +346,31 @@ def apply_to_be_offer(request):
             return JsonResponse({'error': 'invalid user id'})
         models.ApplyOrder.objects.create(user_id=user_id, reason=reason, state='waiting')
         return JsonResponse({'ok': 'submitted'})
+
+
+# 2.7.0:for normal users: to get reserved information of one device
+def get_device_reserved_info(request):
+    if request.method == 'GET':
+        device_id = request.GET.get('deviceid')
+        device = models.Device.objects.get(id=device_id)
+        username = request.session['username']
+        d = {}
+        d['deviceid'] = device.id
+        d['devicename'] = device.device_name
+        d['owner'] = device.owner
+        d['phone'] = device.owner_phone
+        d['location'] = device.location
+        d['addition'] = device.addition
+        d['valid'] = device.valid
+        d['reason'] = device.reason
+        d['orderlist'] = []
+
+        for order in models.RentingOrder.objects.all():
+            o = {}
+            o['user'] = order.username
+            o['start'] = order.start
+            o['due'] = order.due
+            o['contact'] = order.contact
+            d['orderlist'].append(o)
+        return JsonResponse(d)
+
