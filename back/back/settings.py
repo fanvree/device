@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'database',
     'zsw',
     'fzr',
+    'szl'
 ]
 
 MIDDLEWARE = [

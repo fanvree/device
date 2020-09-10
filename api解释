@@ -1,5 +1,6 @@
 学院平台助理(超级管理员)：
 
+################################################ ZSW
 1.1、查询用户信息：
 Method:GET
 URL：/boss/user/list
@@ -18,12 +19,13 @@ Response:
 			'userid': '101' //唯一id
 			'username': 'fzr18',
 			'identity': 'normal'/'renter'/'admin',
+			'contact': '188888888888'
 			'email': '12306@qq.com'
-			'password': 'md5'
 		},
 	]
 }
 
+################################################ ZSW
 1.2、删除用户：
 Method: POST
 URL：/boss/user/delete
@@ -33,16 +35,18 @@ Request:
 }
 Response:{}
 
+################################################ ZSW
 1.3、设置用户类型：
 Method:POST
 URL：/boss/user/set
 Request:
 {
-	'username': name,
+	'userid': '101',
 	'identity': 'normal'/'renter'/'admin',
 }
 Response:{}
 
+################################################ ZSW
 2.1 查看所有设备：
 Method:GET
 URL：/boss/device/list
@@ -50,8 +54,8 @@ QueryParam:
 {
 	'page': 1
 	'size': 20
-	'valid':0/已经上架 1/未审核 2/未上架 
-	'deviceid': '101' //设备标识符
+	'valid':none/已经上架但未外借 on_shelf/未上架 off_shelf/已外借 renting/正在申请 on_order
+	# 'deviceid': '101' //设备标识符
 	'devicename': '设备名称' //可选
 }
 Response:
@@ -64,17 +68,17 @@ Response:
 		'owner': 'fzr18',
 		'phone': '188888888888'//owner's phone
 		'user': 'yxr18',
-		'rentout': 'True'/'False',
 		'start': '2018年1月1日',  //借用开始时间
 		'due': '2018年1月1日',  //借用结束时间
 		'location': '东主楼',
-		'addtion': '备注'
-		'vaild'： 0/已经上架 1/未审核 2/未上架 
+		'addition': '备注'
+		'valid':0/已经上架但未外借 1/未审核 2/未上架 3/已外借
 		'reason': '上架理由'
 	}
 	]
 }
 
+################################################ ZSW
 2.2 修改设备信息：
 Method: POST
 URL: /boss/device/change
@@ -90,13 +94,13 @@ Request:
 	'due': '2018年1月1日',  //借用结束时间
 	'location': '东主楼',
 	'addtion': '备注',
-	'vaild'： 0/已经上架 1/未审核 2/未上架 
+	'valid':0/已经上架但未外借 1/未审核 2/未上架 3/已外借
 	'reason': '上架理由'
 }
 Response:
 {}
 
-
+################################################ ZSW
 2.3 删除设备：
 Method:POST
 URL：/boss/device/delete
@@ -106,6 +110,7 @@ Request:
 }
 Response:{}
 
+################################################ SZL
 3.1 查看租借申请：
 Method:GET
 URL：/boss/order/list
@@ -113,6 +118,7 @@ QueryParam:
 {
 	'page': 1
 	'size': 20
+	'valid':'none','passed','failed','waited'
 }
 Response:
 {
@@ -132,6 +138,7 @@ Response:
 	]
 }
 
+################################################ SZL
 3.2 租借审批申请:
 Method:GET
 URL：/boss/order/state
@@ -142,6 +149,7 @@ QueryParam:
 }
 Response:{}
 
+################################################ SZL
 3.3 删除租借申请：
 Method:POST
 URL：/boss/order/delete
@@ -151,27 +159,62 @@ Request:
 }
 Response:{}
 
+################################################ FZR
 4、用户注册：
 
+################################################ SZL
 5、用户申请成为设备提供者列表查看：
+5.1 用户申请成为设备提供者
 Method:POST
-URL：/boss/offer
+URL：/boss/offer/apply
 Request:
 {
 	'userid': '101',
-	'labinfo': '',
 	'reason': '',
 }
 Response:
 {
-	# offer:[
-	# {
-	# 	'userid': '101',
-	# 	'reason': 'reason',
-	# }
-	# ]
+	
 }
+5.2 查看设备提供者申请列表
+Method:GET
+URL:/boss/offer/list
+Request:
+{
+	'page':'1',
+	'size':'20',
+	'state':'waiting'/'none'
+}
+Response:
+{
+	'total':101,
+	'offerlist':[
+	{
+		'offerid': 1 //申请唯一标识id
+		'applicant': 'yxr18',#申请者
+		'reason': '申请理由',
+	}
+}
+5.3 提供者申请审批:
+Method:GET
+URL：/boss/offer/state
+QueryParam:
+{
+	'offerid': 1,
+	'state': 0/审核通过 1/未审核 2/审核未通过
+}
+Response:{}
 
+5.4 删除租借申请：
+Method:POST
+URL：/boss/offer/delete
+Request:
+{
+	'offerid': '1',
+}
+Response:{}
+
+################################################ SZL
 6、上架设备审核
 通过2筛选未上架和未审核设备，admin在其页面提交是否通过审核
 Method:POST
@@ -181,17 +224,16 @@ Request:{
 	'commit': ''# 具体回复
 }
 Response:{}
+################################################ SZL
 7、统计信息？再说吧
 Method:GET
 URL: /boss/device/filter
 QueryParam:
 {
-	'available': True/False,	# 上架且可用的 false表示filter不包含该选项
-	'unavailable': True/False,	# 未上架
-	'rented': True/False,	# 上架且被占用
+	'valid':'none',...
 	'devicename': '',
 	'owner':'',
-	'applicant':'',
+	'user':'',
 }
 Response:{}
 
@@ -200,9 +242,10 @@ Response:{}
 
 
 学院师生：
+################################################ FZR
 1.1发送邮件：
 Method:GET//后台存储email<->验证码关系
-URL：/sendemail
+URL：/logon
 QueryParam:{
 	'email':'12306@qq.com'
 }
@@ -210,7 +253,7 @@ Response:
 {
 	'state': 'email已经发送'/'email发送失败，请检查格式'
 }
-
+################################################ FZR
 1.2提交注册内容：
 Method:POST
 URL：/logon
@@ -225,6 +268,7 @@ Response:
 	'state': '注册成功'/'注册失败'
 }
 
+################################################ ZSW
 1.3登录：
 Method:POST
 URL：/login
@@ -239,6 +283,7 @@ Response:
 	'token': 'token'
 }
 
+################################################ ZSW
 2.1浏览上架设备信息：
 Method:GET
 URL：/user/device/list
@@ -259,15 +304,17 @@ Response:
 		'owner': 'fzr18',
 		'phone': '188888888888'//owner's phone
 		'user': 'yxr18',
-		'rentout': 'True'/'False',
 		'start': '2018年1月1日',  //借用开始时间
 		'due': '2018年1月1日',  //借用结束时间
 		'location': '东主楼',
-		'addtion': '备注'
+		'addtion': '备注',
+		'valid': 'none', ...
+		'reason':...
 	}
 	]
 }
 
+################################################ ZSW
 3用户申请借设备
 Method:GET
 URL：/user/device/lend
@@ -276,9 +323,10 @@ QueryParam:
 	'deviceid': '101' //设备标识符
 }
 
+################################################ ZSW
 4用户查看借设备记录
 Method:GET
-URL：/user/device/history
+URL：/user/order/history
 QueryParam:
 {
 	'page': 1
@@ -302,6 +350,7 @@ Response:
 	]
 }
 
+################################################ ZSW
 5看到已借设备
 Method:GET
 URL：/user/device/own
@@ -318,23 +367,87 @@ Response:
 		'orderid': '1' //申请唯一标识id
 		'devicename': '自动机',
 		'owner': 'fzr18',
-		'applicant': 'yxr18',
+		'user': 'yxr18',
 		'start':'2018年1月1日',
 		'due': '2018年1月1日',  //借用结束时间，前端对即将到期的设备给出提示
 		'location': '东主楼',
-		'addtion': '备注',
+		'addition': '备注',
+		'valid':0/已经上架但未外借 1/未审核 2/未上架 3/已外借
+		'reason':
 	}
 	]
 }
 
-
+################################################ FZR(以下全为fzr)
 设备提供者：
 1具有普通用户权限
 2.1查询己方设备
+Method:GET
+URL：/owner/device/mine
+QueryParam:
+{
+	'page': 1
+	'size': 20
+	'valid':0/已经上架 1/未审核 2/未上架 
+	# 'deviceid': '101' //设备标识符
+	'devicename': '设备名称' //可选
+}
+Response:
+{
+	'total':'101',
+	'devicelist':[
+	{
+		'deviceid': '1' //设备唯一标识id
+		'devicename': '自动机',
+		'owner': 'fzr18',
+		'phone': '188888888888'//owner's phone
+		'user': 'yxr18',
+		'start': '2018年1月1日',  //借用开始时间
+		'due': '2018年1月1日',  //借用结束时间
+		'location': '东主楼',
+		'addition': '备注'
+		'valid':0/已经上架但未外借 1/未审核 2/未上架 3/已外借
+		'reason': '上架理由'
+	}
+	]
+}
+
 2.2增加己方设备
-2.3删除设备：
-2.4上架设备：
-2.5下架设备：
+Method:POST
+URL：/owner/device/add
+Request:{
+	'devicelist':[
+	{
+		'devicename': '自动机',
+		'phone': '188888888888'//owner's phone
+		'location': '东主楼',
+		'addition': '备注'
+		'reason': '上架理由'
+	}
+	]
+}
+Response:
+{
+	'state': '成功'/'失败' //没想好return 啥，待沟通fzr
+}
+
+
+2.3删除设备：（valid=3）
+2.4上架设备：（valid=1）
+2.5下架设备：（valid=2）
+Method:GET
+URL：/owner/device/change
+QueryParam:
+{
+	'deviceid': '101',
+	'valid':0/已经上架但未外借 1/未审核 2/未上架 3/已外借 4/删除
+}
+Response:
+{
+	'state': '成功'/'失败' //没想好return 啥，待沟通fzr
+}
+
+
 3需要平台支持审核普通用户的设备租借申请，普通用户在填写必要的登
 记信息（例如用途、归还日期等，可自行设计，合理即可）之后，可以
 对尚未借出的设备申请租借，而设备提供者可以查看所有对己方设备的
