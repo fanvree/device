@@ -1,3 +1,15 @@
+1.0查询自己信息
+Method:GET
+URL：/my
+QueryParam:
+{}
+Response:
+{
+	username:
+	userid:
+	identity:
+}
+
 学院平台助理(超级管理员)：
 
 ################################################ ZSW
@@ -221,8 +233,8 @@ Method:GET
 URL:/boss/shelf/list
 Request:
 {
-	'page':'1',
-	'size':'20',
+	#'page':'1',
+	#'size':'20',
 	'state':'waiting'/'passed'/'failed'/'none'
 }
 Response:

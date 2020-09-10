@@ -245,7 +245,16 @@ def owner_device_order_change(request):
         return JsonResponse({'ok': 'ok'})
 
 
-
+def my(request):
+    username = request.session['username']
+    user = User.objects.get(username=username)
+    userid = user.id
+    identity = user.identity
+    return JsonResponse({
+        'username': username,
+        'userid': userid,
+        'identity': identity,
+    })
 
 
 
