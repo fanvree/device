@@ -70,11 +70,11 @@ def logon(request):
                 user.apply = "False"
                 user.token = ""
                 user.save()
-                return JsonResponse({"success": "add into user list"})
+                return JsonResponse({"state": "注册成功"})
             else:
-                return JsonResponse({"error": "code is error"})
-        return JsonResponse({"error": "username is exist"})
-    return JsonResponse({"error": "变量不够"})
+                return JsonResponse({"state": "注册失败code is error"})
+        return JsonResponse({"state": "注册失败username is exist"})
+    return JsonResponse({"state": "注册失败变量不够"})
 
 
 # 查看我的设备
