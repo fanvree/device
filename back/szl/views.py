@@ -7,8 +7,8 @@ from database import models
 
 def GetOrderList(request): #获得用户租借申请的列表
     if request.method == 'GET':
-        page = request.GET.get('page')
-        size = request.GET.get('size')
+        #page = request.GET.get('page')
+        #size = request.GET.get('size')
         valid = request.GET.get('valid')
         answer_list = []  #最终返回的列表
         #order_list，根据valid信息取出来RentingOrder列表
@@ -22,8 +22,7 @@ def GetOrderList(request): #获得用户租借申请的列表
             order_list = models.RentingOrder.objects.all()
 
         #根据页数和个数得到相应的RentingOrder，再转成字典、压入列表
-        for i in range((page-1)*size,page*size):
-            order=order_list[i]
+        for order in order_list:
             device=models.Device.objects.get(id=order.device_id)
             part_answer={}#记录此返回消息的字典
             part_answer['orderid']=order.id
@@ -85,18 +84,16 @@ def GetOfferList(request):#查看设备提供者申请列表
             offer_list=models.ApplyOrder.objects.filter(state='failed')
         else:
             offer_list=models.ApplyOrder.objects.all()
-        page=request.GET.get('page')
-        size=request.GET.get('size')
+        #page=request.GET.get('page')
+        #size=request.GET.get('size')
         answer_list=[]
-        for i in range((page-1)*size,page*size):
-            if (i < len(offer_list) ):#由page和size确定的区间内进行访问
-                offer=offer_list[i]
-                part_answer={}
-                part_answer['offerid']=offer.id
-                user=models.User.objects.get(id=offer.user_id)
-                part_answer['applicant']=user.username
-                part_answer['reason']=offer.reason
-                answer_list.append(part_answer)
+        for offer in offer_list:
+            part_answer={}
+            part_answer['offerid']=offer.id
+            user=models.User.objects.get(id=offer.user_id)
+            part_answer['applicant']=user.username
+            part_answer['reason']=offer.reason
+            answer_list.append(part_answer)
         total=len(answer_list)
         return JsonResponse({'total':total,'offerlist':answer_list})
     else:
@@ -133,8 +130,8 @@ def DeleteOffer(request):#删除用户成为设备提供者的申请
 
 def GetShelfList(request):#得到设备上架请求列表
     if request.method=='GET':
-        page=request.GET.get('page')
-        size=request.GET.get('size')
+        #page=request.GET.get('page')
+        #size=request.GET.get('size')
         state=request.GET.get('state')
 
         if state=='waiting':
@@ -147,20 +144,18 @@ def GetShelfList(request):#得到设备上架请求列表
             tmp_shelf_list = models.ShelfOrder.objects.all()
 
         answer_list=[]
-        for i in range((page-1)*size,page*size):
-            if i<len(tmp_shelf_list):
-                shelf=tmp_shelf_list[i]
-                part_answer={}
-                part_answer['shelfid']=shelf.id
-                part_answer['ownername']=shelf.owner_name
+        for shelf in tmp_shelf_list:
+            part_answer={}
+            part_answer['shelfid']=shelf.id
+            part_answer['ownername']=shelf.owner_name
 
-                device=models.Device.objects.get(id=shelf.device_id)
-                part_answer['devicename']=device.device_name
-                part_answer['location']=device.location
-                part_answer['addition']=device.addition
-                part_answer['reason']=shelf.reason
+            device=models.Device.objects.get(id=shelf.device_id)
+            part_answer['devicename']=device.device_name
+            part_answer['location']=device.location
+            part_answer['addition']=device.addition
+            part_answer['reason']=shelf.reason
 
-                answer_list.append(part_answer)
+            answer_list.append(part_answer)
         total=len(answer_list)
         return JsonResponse({'total':total,'shelflist':answer_list})
     else:
