@@ -24,6 +24,18 @@ from fzr.views import owner_order_list
 from fzr.views import owner_device_order_change
 from django.conf.urls import url
 from szl import views
+from zsw.views import login
+from zsw.views import logout
+from zsw.views import get_user
+from zsw.views import delete_user
+from zsw.views import set_user
+from zsw.views import get_device
+from zsw.views import delete_device
+from zsw.views import edit_device
+from zsw.views import get_shelf_device
+from zsw.views import order_device
+from zsw.views import get_order_history
+from zsw.views import get_self_rented_device
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -37,4 +49,21 @@ urlpatterns = [
     url(r'^owner/device/change$', owner_device_change),
     url(r'^owner/device/order$', owner_order_list),
     url(r'^owner/device/order/change$', owner_device_order_change),
+    url(r'login', login),
+    url(r'logout', logout),
+    url(r'boss/user/list', get_user),
+    url(r'boss/user/delete', delete_user),
+    url(r'boss/user/set', set_user),
+    url(r'boss/device/list', get_device),
+    url(r'boss/device/delete', delete_device),
+    url(r'boss/device/change', edit_device),
+    url(r'user/device/list', get_shelf_device),
+    url(r'user/device/lend', order_device),
+    url(r'user/order/history', get_order_history),
+    url(r'user/device/own', get_self_rented_device),
+    url(r'^/owner/device/mine$', owner_mine),
+    url(r'^/owner/device/add$', owner_device_add),
+    url(r'^/owner/device/change$', owner_device_change),
+    url(r'^/owner/device/order$', owner_order_list),
+    url(r'^/owner/device/order/change$', owner_device_order_change)
 ]
