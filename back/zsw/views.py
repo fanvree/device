@@ -51,8 +51,8 @@ def get_user(request):
         user_list = models.User.objects.filter(username__contains=username)
         total = len(user_list)
 
-        page = request.GET.get('page') if request.GET.get('page') != None else 1
-        size = request.GET.get('size') if request.GET.get('size') != None else 10
+        page = int(request.GET.get('page')) if request.GET.get('page') != None else 1
+        size = int(request.GET.get('size')) if request.GET.get('size') != None else 10
         if (page - 1) * size > total:
             return JsonResponse({'error': 'page overflow'})
         first = (page - 1) * size
@@ -80,7 +80,7 @@ def delete_user(request):
         if admin.identity != 'admin':
             return JsonResponse({'error': 'low permission'})
 
-        userid = request.POST.get('userid')
+        userid = int(request.POST.get('userid'))
         if userid == None:
             return JsonResponse({'error': 'userid'})
         if not models.User.objects.filter(id=userid).exists():
@@ -97,7 +97,7 @@ def set_user(request):
         if admin.identity != 'admin':
             return JsonResponse({'error': 'low permission'})
 
-        userid = request.POST.get('userid missing')
+        userid = request.POST.get('userid')
         identity = request.POST.get('identity')
         if userid == None:
             return JsonResponse({'error': 'userid missing'})
@@ -105,7 +105,7 @@ def set_user(request):
             return JsonResponse({'error': 'user non-existence'})
         if identity == None or identity not in ('normal', 'owner', 'admin'):
             return JsonResponse({'error': 'identity invalid'})
-
+        userid = int(userid)
         user = models.User.objects.get(id=userid)
         user.identity = identity
 
@@ -117,8 +117,8 @@ def get_device(request):
         if admin.identity != 'admin':
             return JsonResponse({'error': 'low permission'})
 
-        page = request.GET.get('page') if request.GET.get('page') != None else 1
-        size = request.GET.get('size') if request.GET.get('size') != None else 10
+        page = int(request.GET.get('page')) if request.GET.get('page') != None else 1
+        size = int(request.GET.get('size')) if request.GET.get('size') != None else 10
         valid = request.GET.get('valid') if request.GET.get('valid') != None else 'none'
         device_name = request.GET.get('divicename')
 
@@ -170,7 +170,8 @@ def edit_device(request):
         device_id = request.POST.get('deviceid')
         if device_id == None:
             return JsonResponse({'error': 'deviceid missing'})
-        if not models.Device.objects.filter(device_id).exists():
+        device_id = int(device_id)
+        if not models.Device.objects.filter(id=device_id).exists():
             return JsonResponse({'error': 'deviceid invalid'})
 
         device = models.Device.objects.get(id=device_id)
@@ -197,6 +198,7 @@ def delete_device(request):
         device_id = request.POST.get('deviceid')
         if device_id == None:
             return JsonResponse({'error': 'deviceid missing'})
+        device_id = int(device_id)
         if not models.Device.objects.filter(device_id).exists():
             return JsonResponse({'error': 'deviceid invalid'})
 
@@ -210,8 +212,8 @@ def delete_device(request):
 # 2.2.0: for normal users: to get devices on shelf
 def get_shelf_device(request):
     if request.method == 'GET':
-        page = request.GET.get('page') if request.GET.get('page') != None else 1
-        size = request.GET.get('size') if request.GET.get('size') != None else 10
+        page = int(request.GET.get('page')) if request.GET.get('page') != None else 1
+        size = int(request.GET.get('size')) if request.GET.get('size') != None else 10
         device_name = request.GET.get('divicename')
 
         if device_name == None:
@@ -264,6 +266,7 @@ def order_device(request):
         due = request.POST.get('due')
         if device_id == None or reason == None or start == None or due == None:
             return JsonResponse({'error': 'parameters missing'})
+        device_id = int(device_id)
         username = request.session['username']
         contact = models.User.objects.get(username=username).contact
         models.RentingOrder.objects.create(
@@ -281,8 +284,8 @@ def order_device(request):
 # 2.4.0: for normal users: to get his or her renting order history
 def get_order_history(request):
     if request.method == 'GET':
-        page = request.GET.get('page') if request.GET.get('page') != None else 1
-        size = request.GET.get('size') if request.GET.get('size') != None else 10
+        page = int(request.GET.get('page')) if request.GET.get('page') != None else 1
+        size = int(request.GET.get('size')) if request.GET.get('size') != None else 10
         username = request.session['username']
         order_list = models.RentingOrder.objects.filter(user=username)
         total = len(order_list)
@@ -314,15 +317,15 @@ def get_order_history(request):
 # 2.5.0:for normal users: to get devices he or she has already rented
 def get_self_rented_device(request):
     if request.method == 'GET':
-        page = request.GET.get('page') if request.GET.get('page') != None else 1
-        size = request.GET.get('size') if request.GET.get('size') != None else 10
+        page = int(request.GET.get('page')) if request.GET.get('page') != None else 1
+        size = int(request.GET.get('size')) if request.GET.get('size') != None else 10
         username = request.session['username']
         device_list = models.Device.objects.filter(user=username)
 
         total = len(device_list)
         if (page - 1) * size > total:
             return JsonResponse({'error': 'page overflow'})
-        
+
         d_list = []
         for device in device_list:
             d = {}
@@ -363,6 +366,7 @@ def apply_to_be_offer(request):
         reason = request.POST.get('reason')
         if user_id == None or reason == None:
             return JsonResponse({'error': 'parameters missing'})
+        user_id = int(user_id)
         if user_id != models.User.objects.get(id=request.session['username']):
             return JsonResponse({'error': 'invalid user id'})
         models.ApplyOrder.objects.create(user_id=user_id, reason=reason, state='waiting')
