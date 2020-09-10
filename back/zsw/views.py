@@ -108,6 +108,7 @@ def set_user(request):
         userid = int(userid)
         user = models.User.objects.get(id=userid)
         user.identity = identity
+        return JsonResponse({'ok': 'set'})
 
 
 # 1.2.1: for admin: to get devices under various filters
