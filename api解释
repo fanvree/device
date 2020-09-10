@@ -429,15 +429,11 @@ Response:
 Method:POST
 URL：/owner/device/add
 Request:{
-	'devicelist':[
-	{
-		'devicename': '自动机',
-		'phone': '188888888888'//owner's phone
-		'location': '东主楼',
-		'addition': '备注'
-		'reason': '上架理由'
-	}
-	]
+	'devicename': '自动机',
+	'phone': '188888888888'//owner's phone
+	'location': '东主楼',
+	'addition': '备注'
+	'reason': '上架理由'
 }
 Response:
 {
