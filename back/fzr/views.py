@@ -142,7 +142,7 @@ def owner_device_add(request):
                 shelf_order.owner_name = device.owner
                 shelf_order.reason = device.reason
                 shelf_order.state = 'waiting'
-                shelf_order.start_time = timezone.localtime(timezone.now())
+                shelf_order.start_time = timezone.now()
                 shelf_order.save()
 
 
@@ -215,7 +215,7 @@ def owner_order_list(request):
 
 
 # 改变orderid订单状态：state 0/审核通过 1/未审核 2/审核未通过   'passed','failed','waited'
-# 'rentstate': 0/审核通过，未借出   1/已经借出  2/已经归还 的情况  'failed'  'passed' 'renting'  'back'
+# 'rentstate': 0/审核通过，未借出   1/已经借出  2/已经归还 的情况  'default' 'renting'  'back'
 def owner_device_order_change(request):
     if request.method == 'GET':
         order_id = int(request.GET['orderid'])
@@ -228,13 +228,13 @@ def owner_device_order_change(request):
             if rent_state != 'none':
                 renting_order.rent_state = rent_state
                 if rent_state == 'renting':
-                    renting_order.rent_start = timezone.localtime(timezone.now())
+                    renting_order.rent_start = timezone.now()
                     if Device.objects.filter(device_id=renting_order.device_id).exists():
                         device = Device.objects.get(device_id=renting_order.device_id)
                         device.valid = 'renting'
                         device.save()
                 elif rent_state == 'back':
-                    renting_order.rent_end = timezone.localtime(timezone.now())
+                    renting_order.rent_end = timezone.now()
                     if Device.objects.filter(device_id=renting_order.device_id).exists():
                         device = Device.objects.get(device_id=renting_order.device_id)
                         device.valid = 'on_shelf'
