@@ -362,7 +362,7 @@ Response:
 
 ################################################ ZSW
 3用户申请借设备
-Method:GET
+Method:POST
 URL：/user/device/lend
 QueryParam:
 {
