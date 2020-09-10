@@ -1,5 +1,6 @@
 学院平台助理(超级管理员)：
 
+################################################ ZSW
 1.1、查询用户信息：
 Method:GET
 URL：/boss/user/list
@@ -24,6 +25,7 @@ Response:
 	]
 }
 
+################################################ ZSW
 1.2、删除用户：
 Method: POST
 URL：/boss/user/delete
@@ -33,6 +35,7 @@ Request:
 }
 Response:{}
 
+################################################ ZSW
 1.3、设置用户类型：
 Method:POST
 URL：/boss/user/set
@@ -43,6 +46,7 @@ Request:
 }
 Response:{}
 
+################################################ ZSW
 2.1 查看所有设备：
 Method:GET
 URL：/boss/device/list
@@ -68,12 +72,13 @@ Response:
 		'due': '2018年1月1日',  //借用结束时间
 		'location': '东主楼',
 		'addition': '备注'
-		'valid':none/已经上架但未外借 on_shelf/未上架 off_shelf/已外借 renting/正在申请 on_order
+		'valid':0/已经上架但未外借 1/未审核 2/未上架 3/已外借
 		'reason': '上架理由'
 	}
 	]
 }
 
+################################################ ZSW
 2.2 修改设备信息：
 Method: POST
 URL: /boss/device/change
@@ -95,7 +100,7 @@ Request:
 Response:
 {}
 
-
+################################################ ZSW
 2.3 删除设备：
 Method:POST
 URL：/boss/device/delete
@@ -105,6 +110,7 @@ Request:
 }
 Response:{}
 
+################################################ SZL
 3.1 查看租借申请：
 Method:GET
 URL：/boss/order/list
@@ -132,6 +138,7 @@ Response:
 	]
 }
 
+################################################ SZL
 3.2 租借审批申请:
 Method:GET
 URL：/boss/order/state
@@ -142,6 +149,7 @@ QueryParam:
 }
 Response:{}
 
+################################################ SZL
 3.3 删除租借申请：
 Method:POST
 URL：/boss/order/delete
@@ -151,8 +159,10 @@ Request:
 }
 Response:{}
 
+################################################ FZR
 4、用户注册：
 
+################################################ SZL
 5、用户申请成为设备提供者列表查看：
 5.1 用户申请成为设备提供者
 Method:POST
@@ -204,7 +214,7 @@ Request:
 }
 Response:{}
 
-
+################################################ SZL
 6、上架设备审核
 通过2筛选未上架和未审核设备，admin在其页面提交是否通过审核
 Method:POST
@@ -214,6 +224,7 @@ Request:{
 	'commit': ''# 具体回复
 }
 Response:{}
+################################################ SZL
 7、统计信息？再说吧
 Method:GET
 URL: /boss/device/filter
@@ -231,6 +242,7 @@ Response:{}
 
 
 学院师生：
+################################################ FZR
 1.1发送邮件：
 Method:GET//后台存储email<->验证码关系
 URL：/logon
@@ -241,7 +253,7 @@ Response:
 {
 	'state': 'email已经发送'/'email发送失败，请检查格式'
 }
-
+################################################ FZR
 1.2提交注册内容：
 Method:POST
 URL：/logon
@@ -256,6 +268,7 @@ Response:
 	'state': '注册成功'/'注册失败'
 }
 
+################################################ ZSW
 1.3登录：
 Method:POST
 URL：/login
@@ -270,6 +283,7 @@ Response:
 	'token': 'token'
 }
 
+################################################ ZSW
 2.1浏览上架设备信息：
 Method:GET
 URL：/user/device/list
@@ -300,6 +314,7 @@ Response:
 	]
 }
 
+################################################ ZSW
 3用户申请借设备
 Method:GET
 URL：/user/device/lend
@@ -308,6 +323,7 @@ QueryParam:
 	'deviceid': '101' //设备标识符
 }
 
+################################################ ZSW
 4用户查看借设备记录
 Method:GET
 URL：/user/order/history
@@ -334,6 +350,7 @@ Response:
 	]
 }
 
+################################################ ZSW
 5看到已借设备
 Method:GET
 URL：/user/device/own
@@ -361,7 +378,7 @@ Response:
 	]
 }
 
-
+################################################ FZR(以下全为fzr)
 设备提供者：
 1具有普通用户权限
 2.1查询己方设备
