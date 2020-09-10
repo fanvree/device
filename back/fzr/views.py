@@ -79,45 +79,46 @@ def logon(request):
 
 # 查看我的设备
 # 可以根据devicename进行筛选
-# 也可以根据valid状态筛选 0/已经上架但未外借 1/未审核 2/未上架 3/已外借
+# 也可以根据valid状态筛选 on_shelf/已经上架但未外借0 on_order/未审核1 off_shelf/未上架2 renting/已外借3
 def owner_mine(request):
     page = 1
     size = 10
-    valid = -1
+    valid = 'none'
     device_name = ''
     if 'page' in request.GET:
         page = int(request.GET['page'])
     if 'size' in request.GET:
         size = int(request.GET['size'])
     if 'valid' in request.GET:
-        valid = int(request.GET['valid'])
+        valid = request.GET['valid']
     if 'devicename' in request.GET:
         device_name = int(request.GET['devicename'])
     show_list = Device.objects.all()
     total = 0
     ret_list = []
-    for item in show_list:
-        if (valid == -1 or valid == item.valid) and (device_name == "" or item.device_name.find(device_name) != -1) \
-                and item.owner == request.session['username']:
+    for device in show_list:
+        if (valid == 'none' or valid == device.valid) and (device_name == "" or device.device_name.find(device_name) != -1) \
+                and device.owner == request.session['username']:
             total += 1
             if ((page - 1) * size < total) and (total < page * size):
                 ret_list.append({
-                    'deviceid': item.id,
-                    'devicename': item.device_name,
-                    'owner': item.owner,
-                    'phone': item.owner_phone,
-                    'user': item.user,
-                    'start': item.start,
-                    'due': item.due,
-                    'location': item.location,
-                    'addition': item.addition,
-                    'valid': item.valid,
-                    'reason': item.reason,
+                    'deviceid': device.id,
+                    'devicename': device.device_name,
+                    'owner': device.owner,
+                    'phone': device.owner_phone,
+                    'user': device.user,
+                    'start': device.start,
+                    'due': device.due,
+                    'location': device.location,
+                    'addition': device.addition,
+                    'valid': device.valid,
+                    'reason': device.reason,
                 })
     return JsonResponse(ret_list)
 
 
 # 增加我的设备
+# 'valid':'none','passed','failed','waited'
 def owner_device_add(request):
     if 'devicelist' in request.POST:
         device_list = request.POST['devicelist']
@@ -132,7 +133,7 @@ def owner_device_add(request):
                 device.due = None
                 device.location = request.POST['location']
                 device.addition = request.POST['addition']
-                device.valid = '1'
+                device.valid = 'on_order'
                 device.reason = request.POST['reason']
                 device.save()
                 # shelf_order
@@ -140,23 +141,20 @@ def owner_device_add(request):
                 shelf_order.device_id = device.id
                 shelf_order.owner_name = device.owner
                 shelf_order.reason = device.reason
-                shelf_order.state = '1'
+                shelf_order.state = 'waiting'
                 shelf_order.start_time = timezone.now()
                 shelf_order.save()
 
 
-# 改变我的设备状态： 0已归还 1未审核 2未上架 3已外借 4删除
+# 改变我的设备状态：
 def owner_device_change(request):
     if request.method == 'GET' and 'deviceid' in request.GET and 'valid' in request.GET:
         device_id = int(request.GET['deviceid'])
-        valid = int(request.GET['valid'])
+        valid = request.GET['valid']
         if Device.objects.filter(device_id=device_id).exists():
             device = Device.objects.get(device_id=device_id)
-            if valid == 4:
+            if valid == 'delete':
                 Device.objects.filter(device_id=device_id).delete()
-            elif valid == 1:
-                device.valid = valid
-                device.save()
             else:
                 device.valid = valid
                 device.save()
@@ -165,16 +163,16 @@ def owner_device_change(request):
     return JsonResponse({"error": "valid parse"})
 
 
-# 查询订单列表： 可以筛选 'state': 0/审核通过 1/未审核 2/审核未通过 和
-# 'rentstate': 0/审核通过，未借出   1/已经借出  2/已经归还 的情况
+# 查询订单列表： 可以筛选 'state': 'valid':'none','passed','failed','waited'
+# 'rentstate': 'none'  'default' 'renting'  'back'                 0/审核通过，未借出   1/已经借出  2/已经归还 的情况
 # deviceid 查看某个设备的订单
 def owner_order_list(request):
     if request.method == 'GET':
         page = 1
         size = 10
         device_id = -1
-        valid = -1
-        rent_state = -1
+        valid = 'none'
+        rent_state = 'none'
         if 'page' in request.GET:
             page = int(request.GET['page'])
         if 'size' in request.GET:
@@ -182,21 +180,21 @@ def owner_order_list(request):
         if 'deviceid' in request.GET:
             device_id = int(request.GET['deviceid'])
         if 'state' in request.GET:
-            valid = int(request.GET['state'])
-        if 'state' in request.GET:
+            valid = request.GET['state']
+        if 'rentstate' in request.GET:
             rent_state = int(request.GET['rentstate'])
         total = 0
         ret = []
         for renting_order in RentingOrder.objects.all():
-            if Device.objects.filter(renting_order.device_id).exists():
-                device = Device.objects.get(renting_order.device_id)
+            if Device.objects.filter(device_id=renting_order.device_id).exists():
+                device = Device.objects.get(device_id=renting_order.device_id)
                 owner = device.owner
                 device_name = device.device_name
                 location = device.location
                 if owner == request.session['username'] and \
                         (device_id == -1 or device_id == renting_order.device_id) and \
-                        (valid == -1 or valid == renting_order.valid) and \
-                        (rent_state == -1 or rent_state == renting_order.rent_state):
+                        (valid == 'none' or valid == renting_order.valid) and \
+                        (rent_state == 'none' or rent_state == renting_order.rent_state):
                     total += 1
                     if ((page - 1) * size < total) and (total <= page * size):
                         ret.append({
@@ -216,30 +214,30 @@ def owner_order_list(request):
         return JsonResponse({'orderlist': ret, 'total': total})
 
 
-# 改变orderid订单状态：state 0/审核通过 1/未审核 2/审核未通过
-# 'rentstate': 0/审核通过，未借出   1/已经借出  2/已经归还 的情况
+# 改变orderid订单状态：state 0/审核通过 1/未审核 2/审核未通过   'passed','failed','waited'
+# 'rentstate': 0/审核通过，未借出   1/已经借出  2/已经归还 的情况  'default' 'renting'  'back'
 def owner_device_order_change(request):
     if request.method == 'GET':
         order_id = int(request.GET['orderid'])
-        state = int(request.GET.get('state')) if request.GET.get('state') is not None else -1
-        rent_state = int(request.GET.get('rentstate')) if request.GET.get('rentstate') is not None else -1
+        state = request.GET.get('state') if request.GET.get('state') is not None else 'none'
+        rent_state = request.GET.get('rentstate') if request.GET.get('rentstate') is not None else 'none'
         if RentingOrder.objects.filter(order_id=order_id).exists():
             renting_order = RentingOrder.objects.get(order_id=order_id)
-            if state != -1:
+            if state != 'none':
                 renting_order.valid = state
-            if rent_state != -1:
+            if rent_state != 'none':
                 renting_order.rent_state = rent_state
-                if rent_state == 1:
+                if rent_state == 'renting':
                     renting_order.rent_start = timezone.now()
                     if Device.objects.filter(device_id=renting_order.device_id).exists():
                         device = Device.objects.get(device_id=renting_order.device_id)
-                        device.valid = 3
+                        device.valid = 'renting'
                         device.save()
-                elif rent_state == 2:
+                elif rent_state == 'back':
                     renting_order.rent_end = timezone.now()
                     if Device.objects.filter(device_id=renting_order.device_id).exists():
                         device = Device.objects.get(device_id=renting_order.device_id)
-                        device.valid = 0
+                        device.valid = 'on_shelf'
                         device.save()
             renting_order.save()
         return JsonResponse({'ok': 'ok'})

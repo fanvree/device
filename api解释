@@ -84,7 +84,7 @@ Response:
 		'due': '2018年1月1日',  //借用结束时间
 		'location': '东主楼',
 		'addition': '备注'
-		'valid':0/已经上架但未外借 1/未审核 2/未上架 3/已外借
+		'valid':english
 		'reason': '上架理由'
 	}
 	]
@@ -101,12 +101,11 @@ Request:
 	'owner': 'fzr18',
 	'phone': '188888888888'
 	'user': 'yxr18',
-	'rentout': 'True'/'False',
 	'start': '2018年1月1日',  //借用开始时间
 	'due': '2018年1月1日',  //借用结束时间
 	'location': '东主楼',
 	'addtion': '备注',
-	'valid':0/已经上架但未外借 1/未审核 2/未上架 3/已外借
+	'valid':english
 	'reason': '上架理由'
 }
 Response:
@@ -395,7 +394,7 @@ Response:
 1具有普通用户权限
 2.1查询己方设备
 # 可以根据devicename进行筛选
-# 也可以根据valid状态筛选 0/已经上架但未外借 1/未审核 2/未上架 3/已外借
+# 也可以根据valid状态筛选on_shelf on_order off_shelf renting none
 Method:GET
 URL：/owner/device/mine
 QueryParam:
@@ -446,10 +445,10 @@ Response:
 }
 
 
-2.3删除设备：（valid=3）
-2.4上架设备：（valid=1）
-2.5下架设备：（valid=2）
-# 改变我的设备状态valid： 0已归还 1未审核 2未上架 3已外借 4删除
+2.3删除设备：（valid=delete）
+2.4上架设备：（）
+2.5下架设备：（）
+# 改变我的设备状态valid：on_shelf on_order off_shelf renting   delete(删除设备)
 Method:GET
 URL：/owner/device/change
 QueryParam:
@@ -472,8 +471,8 @@ Response:
 4需要平台支持管理所有已借出设备历史信息，包括查看已借出的设备信
 息、设备的归还情况等，同时对归还的设备进行确认归还操作等等。
 
-# 查询订单列表： 可以筛选 'state': 0/审核通过 1/未审核 2/审核未通过 和
-# 'rentstate': 0/审核通过，未借出   1/已经借出  2/已经归还 的情况
+# 查询订单列表： 可以筛选 'state': 'passed','failed','waited','none'
+# 'rentstate':    'default' 'renting'  'back' 'none'
 # deviceid 查看某个设备的订单
 Method:GET
 URL：/owner/device/order
@@ -505,8 +504,8 @@ QueryParam:
 }
 
 
-# 改变orderid订单状态：state 0/审核通过 1/未审核 2/审核未通过
-# 'rentstate': 0/审核通过，未借出   1/已经借出  2/已经归还 的情况
+# 改变orderid订单状态：state 'passed','failed','waited'
+# 'rentstate':'default' 'renting'  'back'
 
 Method:GET
 URL：/owner/device/order/change
