@@ -453,6 +453,28 @@ Response:
 对尚未借出的设备申请租借，而设备提供者可以查看所有对己方设备的
 租借申请和申请方信息，并同意或拒绝申请，审核后对应的申请用户可
 以收到审核结果；
+Method:GET
+URL：/owner/device/order
+QueryParam:
+{
+	page:1
+	size:10
+}
+{
+	total: '101'
+	'devicelist':[
+	{
+		'orderid': '1' //申请唯一标识id
+		'devicename': '自动机',
+		'owner': 'fzr18',
+		'applicant': 'yxr18',
+		'start':'2018年1月1日',
+		'due': '2018年1月1日',  //借用结束时间
+		'location': '东主楼',
+		'addtion': '备注',
+		'state': 0/审核通过 1/未审核 2/审核未通过 
+	}]
+}
 4需要平台支持管理所有已借出设备历史信息，包括查看已借出的设备信
 息、设备的归还情况等，同时对归还的设备进行确认归还操作等等。
 
