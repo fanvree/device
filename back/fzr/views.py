@@ -117,7 +117,7 @@ def owner_device_add(request):
             if request.POST['owner']:
                 device = Device()
                 device.device_name = request.POST['devicename']
-                device.owner = request.POST['owner']
+                device.owner = request.session['username']
                 device.owner_phone = request.POST['ownerphone']
                 device.user = ''
                 device.start = None
@@ -128,5 +128,19 @@ def owner_device_add(request):
                 device.reason = request.POST['reason']
                 device.save()
 
+
+def owner_device_change(request):
+    if request.method == 'GET' and 'deviceid' in request.GET and 'valid' in request.GET:
+        device_id = int(request.GET['deviceid'])
+        valid = int(request.GET['valid'])
+        if Device.objects.filter(device_id=device_id).exists():
+            item = Device.objects.get(device_id=device_id)
+            if valid == 1:
+                item.valid = valid
+            else:
+                item.valid = 2
+            return JsonResponse({"ok": "setting ok"})
+        return JsonResponse({"error": "no deviceid"})
+    return JsonResponse({"error": "valid parse"})
 
 
