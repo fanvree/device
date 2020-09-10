@@ -18,10 +18,10 @@ class Device(models.Model):
     device_name = models.CharField(max_length=64, default=None)
     owner = models.CharField(max_length=64, default=None)
     owner_phone = models.CharField(max_length=64, default=None)
-    user = models.CharField(max_length=64, default=None)
+    # user = models.CharField(max_length=64, default=None)
     # rent_out = models.CharField(default=False)
-    start = models.DateField(default=datetime.datetime.now())    # TODO
-    due = models.DateField(default=datetime.datetime.now())
+    # start = models.DateField(default=datetime.datetime.now())    # TODO
+    # due = models.DateField(default=datetime.datetime.now())
     location = models.CharField(max_length=64, default=None)
     addition = models.CharField(max_length=64, default=None)
     valid = models.CharField(max_length=64, default=None)
