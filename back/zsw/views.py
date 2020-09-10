@@ -1,5 +1,6 @@
 from django.shortcuts import render
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse
+from django.contrib.auth.hashers import make_password, check_password
 from database import models
 
 
@@ -13,7 +14,7 @@ def login(request):
         if username == None or username == '' or not models.User.objects.filter(username=username).exists():
             return JsonResponse({'error': 'no such a user'})
         # 密码不匹配
-        if password != models.User.objects.get(username=username).password:
+        if check_password(password, models.User.objects.get(username=username).password):
             return JsonResponse({'error': 'password is wrong'})
         # 当前已经处于登录状态
         if 'is_login' in request.session and request.session['is_login']:
@@ -45,18 +46,15 @@ def get_user(request):
             return JsonResponse({'error': 'low permission'})
 
         username = request.GET.get('username')
-        page = request.GET.get('page')
-        size = request.GET.get('size')
-        total = len(models.User.objects.all())
-        if not size or size < 0:
-            return JsonResponse({'error': 'empty data for undefined or negative size'})
-        if size == 0:
-            size = total
-        if not page or page <= 0 or (page - 1) * size > total:
-            return JsonResponse({'error': 'empty data for undefined or illegal page'})
         if not username:
             return JsonResponse({'error': 'empty data for undefined or illegal username'})
-        user_list = models.User.objects.all()
+        user_list = models.User.objects.filter(username__contains=username)
+        total = len(user_list)
+
+        page = request.GET.get('page') if request.GET.get('page') != None else 1
+        size = request.GET.get('size') if request.GET.get('size') != None else 10
+        if (page - 1) * size > total:
+            return JsonResponse({'error': 'page overflow'})
         first = (page - 1) * size
         last = max(page * size, total)
         user_list = user_list[first: last]
@@ -130,7 +128,10 @@ def get_device(request):
             device_list = models.Device.objects.filter(device_name=device_name)
         if valid != 'none':
             device_list = device_list.filter(valid=valid)
+
         total = len(device_list)
+        if (page - 1) * size > total:
+            return JsonResponse({'error': 'page overflow'})
 
         if not size or size < 0:
             return JsonResponse({'error': 'empty data for undefined or negative size'})
@@ -164,7 +165,6 @@ def get_device(request):
 
 
 # 1.2.2: for admin: to edit device with optional choice
-# TODO: to add verification of invalid parameters
 def edit_device(request):
     if request.method == 'POST':
         device_id = request.POST.get('deviceid')
@@ -218,23 +218,27 @@ def get_shelf_device(request):
             device_list = models.Device.objects.all()
         else:
             device_list = models.Device.objects.filter(device_name=device_name)
+        device_list = device_list.filter(valid__in=['on_shelf', 'renting'])
+
         total = len(device_list)
+        if (page - 1) * size > total:
+            return JsonResponse({'error': 'page overflow'})
+
         d_list = []
         for device in device_list:
-            if device.valid == 'on_shelf' or device.valid == 'renting':
-                d = {}
-                d['deviceid'] = device.id
-                d['devicename'] = device.device_name
-                d['owner'] = device.owner
-                d['phone'] = device.owner_phone
-                d['user'] = device.user
-                d['start'] = device.start
-                d['due'] = device.due
-                d['location'] = device.location
-                d['addition'] = device.addition
-                d['valid'] = device.valid
-                d['reason'] = device.reason
-                d_list.append(d)
+            d = {}
+            d['deviceid'] = device.id
+            d['devicename'] = device.device_name
+            d['owner'] = device.owner
+            d['phone'] = device.owner_phone
+            d['user'] = device.user
+            d['start'] = device.start
+            d['due'] = device.due
+            d['location'] = device.location
+            d['addition'] = device.addition
+            d['valid'] = device.valid
+            d['reason'] = device.reason
+            d_list.append(d)
 
         if not size or size < 0:
             return JsonResponse({'error': 'empty data for undefined or negative size'})
@@ -282,12 +286,8 @@ def get_order_history(request):
         username = request.session['username']
         order_list = models.RentingOrder.objects.filter(user=username)
         total = len(order_list)
-        if not size or size < 0:
-            return JsonResponse({'error': 'empty data for undefined or negative size'})
-        if size == 0:
-            size = total
-        if not page or page <= 0 or (page - 1) * size > total:
-            return JsonResponse({'error': 'empty data for undefined or illegal page'})
+        if (page - 1) * size > total:
+            return JsonResponse({'error': 'page overflow'})
 
         first = (page - 1) * size
         last = max(page * size, total)
@@ -318,13 +318,11 @@ def get_self_rented_device(request):
         size = request.GET.get('size') if request.GET.get('size') != None else 10
         username = request.session['username']
         device_list = models.Device.objects.filter(user=username)
+
         total = len(device_list)
-        if not size or size < 0:
-            return JsonResponse({'error': 'empty data for undefined or negative size'})
-        if size == 0:
-            size = total
-        if not page or page <= 0 or (page - 1) * size > total:
-            return JsonResponse({'error': 'empty data for undefined or illegal page'})
+        if (page - 1) * size > total:
+            return JsonResponse({'error': 'page overflow'})
+        
         d_list = []
         for device in device_list:
             d = {}
@@ -357,3 +355,15 @@ def get_self_rented_device(request):
             'devicelist': d_list,
         })
 
+
+# 2.6.0:for normal users: to apply for higher identity(offer)
+def apply_to_be_offer(request):
+    if request.method == 'POST':
+        user_id = request.POST.get('userid')
+        reason = request.POST.get('reason')
+        if user_id == None or reason == None:
+            return JsonResponse({'error': 'parameters missing'})
+        if user_id != models.User.objects.get(id=request.session['username']):
+            return JsonResponse({'error': 'invalid user id'})
+        models.ApplyOrder.objects.create(user_id=user_id, reason=reason, state='waiting')
+        return JsonResponse({'ok': 'submitted'})
