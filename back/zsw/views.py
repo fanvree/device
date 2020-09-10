@@ -40,6 +40,10 @@ def logout(request):
 def get_user(request):
     # TODO: add identity verification
     if request.method == 'GET':
+        admin = models.User.objects.get(username=request.session['username'])
+        if admin.identity != 'admin':
+            return JsonResponse({'error': 'low permission'})
+
         username = request.GET.get('username')
         page = request.GET.get('page')
         size = request.GET.get('size')
@@ -74,6 +78,10 @@ def get_user(request):
 # 1.1.2: for admin: delete users
 def delete_user(request):
     if request.method == 'POST':
+        admin = models.User.objects.get(username=request.session['username'])
+        if admin.identity != 'admin':
+            return JsonResponse({'error': 'low permission'})
+
         userid = request.POST.get('userid')
         if userid == None:
             return JsonResponse({'error': 'userid'})
@@ -87,6 +95,10 @@ def delete_user(request):
 # 1.1.3: for admin: set users' identity
 def set_user(request):
     if request.method == 'POST':
+        admin = models.User.objects.get(username=request.session['username'])
+        if admin.identity != 'admin':
+            return JsonResponse({'error': 'low permission'})
+
         userid = request.POST.get('userid missing')
         identity = request.POST.get('identity')
         if userid == None:
@@ -102,8 +114,11 @@ def set_user(request):
 
 # 1.2.1: for admin: to get devices under various filters
 def get_device(request):
-    # TODO: add identity verification
     if request.method == 'GET':
+        admin = models.User.objects.get(username=request.session['username'])
+        if admin.identity != 'admin':
+            return JsonResponse({'error': 'low permission'})
+
         page = request.GET.get('page') if request.GET.get('page') != None else 1
         size = request.GET.get('size') if request.GET.get('size') != None else 10
         valid = request.GET.get('valid') if request.GET.get('valid') != None else 'none'
@@ -149,6 +164,7 @@ def get_device(request):
 
 
 # 1.2.2: for admin: to edit device with optional choice
+# TODO: to add verification of invalid parameters
 def edit_device(request):
     if request.method == 'POST':
         device_id = request.POST.get('deviceid')
@@ -235,13 +251,71 @@ def get_shelf_device(request):
         })
 
 
-# 2.5.0:for normal users: to get devices they has already rented
-# TODO: tips for renting orders that are falling due or overdue
-def get_owned_device(request):
+# 2.3.0: for normal users: to order devices
+def order_device(request):
+    if request.method == 'POST':
+        device_id = request.POST.get('deviceid')
+        reason = request.POST.get('reason')
+        start = request.POST.get('start')
+        due = request.POST.get('due')
+        if device_id == None or reason == None or start == None or due == None:
+            return JsonResponse({'error': 'parameters missing'})
+        username = request.session['username']
+        contact = models.User.objects.get(username=username).contact
+        models.RentingOrder.objects.create(
+            device_id=device_id,
+            username=username,
+            reason=reason,
+            contact=contact,
+            start=start,
+            due=due,
+            valid='waiting',
+        )
+        return JsonResponse({'ok': 'waiting for offer to agree the order'})
+
+
+# 2.4.0: for normal users: to get his or her renting order history
+def get_order_history(request):
     if request.method == 'GET':
         page = request.GET.get('page') if request.GET.get('page') != None else 1
         size = request.GET.get('size') if request.GET.get('size') != None else 10
-        # if check(request):
+        username = request.session['username']
+        order_list = models.RentingOrder.objects.filter(user=username)
+        total = len(order_list)
+        if not size or size < 0:
+            return JsonResponse({'error': 'empty data for undefined or negative size'})
+        if size == 0:
+            size = total
+        if not page or page <= 0 or (page - 1) * size > total:
+            return JsonResponse({'error': 'empty data for undefined or illegal page'})
+
+        first = (page - 1) * size
+        last = max(page * size, total)
+        order_list = order_list[first:last]
+        o_list = []
+        for order in order_list:
+            device = models.Device.objects.get(id=order.device_id)
+            o = {}
+            o['orderid'] = order.id
+            o['devicename'] = device.device_name
+            o['owner'] = device.owner
+            o['user'] = device.user
+            o['start'] = order.start
+            o['due'] = order.due
+            o['location'] = device.location
+            o['addition'] = device.addition
+            o['state'] = order.valid
+        return JsonResponse({
+            'total': total,
+            'orderlist': o_list,
+        })
+
+
+# 2.5.0:for normal users: to get devices he or she has already rented
+def get_self_rented_device(request):
+    if request.method == 'GET':
+        page = request.GET.get('page') if request.GET.get('page') != None else 1
+        size = request.GET.get('size') if request.GET.get('size') != None else 10
         username = request.session['username']
         device_list = models.Device.objects.filter(user=username)
         total = len(device_list)
@@ -251,9 +325,6 @@ def get_owned_device(request):
             size = total
         if not page or page <= 0 or (page - 1) * size > total:
             return JsonResponse({'error': 'empty data for undefined or illegal page'})
-        first = (page - 1) * size
-        last = max(page * size, total)
-        device_list = device_list[first: last]
         d_list = []
         for device in device_list:
             d = {}
@@ -268,10 +339,21 @@ def get_owned_device(request):
             d['addition'] = device.addition
             d['valid'] = device.valid
             d['reason'] = device.reason
+            d['orderlist'] = []
             d_list.append(d)
-
+        for order in models.RentingOrder.objects.all():
+            for d in d_list:
+                if order.device_id == d['deviceid']:
+                    o = {}
+                    o['username'] = order.username
+                    o['reason'] = order.reason
+                    o['contact'] = order.contact
+                    o['start'] = order.start
+                    o['due'] = order.due
+                    o['valid'] = o['valid']
+                    d['orderlist'].append(o)
         return JsonResponse({
             'total': total,
             'devicelist': d_list,
         })
-        # TODO:
+
