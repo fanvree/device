@@ -1,7 +1,9 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.contrib.auth.hashers import make_password, check_password
+from django.utils import timezone
 from database import models
+from datetime import date
 
 
 # Create your views here.
@@ -12,17 +14,17 @@ def login(request):
         password = request.POST.get('password')
         # 用户名参数不存在或者为空，或者此用户不存在
         if username == None or username == '' or not models.User.objects.filter(username=username).exists():
-            return JsonResponse({'state': 0})
+            return JsonResponse({'state': 'empty'})
         # 密码不匹配
-        if check_password(password, models.User.objects.get(username=username).password):
-            return JsonResponse({'state': 0})
+        if not check_password(password, models.User.objects.get(username=username).password):
+            return JsonResponse({'state': 'not matched'})
         # 当前已经处于登录状态
         if 'is_login' in request.session and request.session['is_login']:
-            return JsonResponse({'state': 0})
+            return JsonResponse({'state': 'already online'})
 
         request.session['username'] = username
         request.session['is_login'] = True
-        return JsonResponse({'state': 0})
+        return JsonResponse({'state': 1})
 
 
 # 1.3.4: for all users: logout
@@ -122,7 +124,7 @@ def get_device(request):
         page = int(request.GET.get('page')) if request.GET.get('page') != None else 1
         size = int(request.GET.get('size')) if request.GET.get('size') != None else 10
         valid = request.GET.get('valid') if request.GET.get('valid') != None else 'none'
-        device_name = request.GET.get('divicename')
+        device_name = request.GET.get('devicename')
 
         if device_name == None:
             device_list = models.Device.objects.all()
@@ -178,7 +180,7 @@ def edit_device(request):
 
         device = models.Device.objects.get(id=device_id)
         d = {}
-        d['devicename'] = request.POST.get('devicename')
+        d['device_name'] = request.POST.get('devicename')
         d['owner'] = request.POST.get('owner')
         d['phone'] = request.POST.get('phone')
         d['user'] = request.POST.get('user')
@@ -188,9 +190,9 @@ def edit_device(request):
         d['addition'] = request.POST.get('addition')
         d['valid'] = request.POST.get('valid')
         d['reason'] = request.POST.get('reason')
-        for key, value in d:
+        for key, value in d.items():
             if value != None:
-                device[key] = value
+                setattr(device, key, value)
         device.save()
         return JsonResponse({'ok': 'edited'})
 
@@ -202,7 +204,7 @@ def delete_device(request):
         if device_id == None:
             return JsonResponse({'error': 'deviceid missing'})
         device_id = int(device_id)
-        if not models.Device.objects.filter(device_id).exists():
+        if not models.Device.objects.filter(id=device_id).exists():
             return JsonResponse({'error': 'deviceid invalid'})
 
         models.Device.objects.get(id=device_id).delete()
@@ -269,6 +271,24 @@ def order_device(request):
         due = request.POST.get('due')
         if device_id == None or reason == None or start == None or due == None:
             return JsonResponse({'error': 'parameters missing'})
+        start_list = start.split('-')
+        due_list = due.split('-')
+        start_time = date(year=int(start_list[0]), month=int(start_list[1]), day=int(start_list[2]))
+        due_time = date(year=int(due_list[0]), month=int(due_list[1]), day=int(start_list[2]))
+        # to prevent illegal renting order resulting from duration collision
+        now = timezone.now().date()
+        for order in models.RentingOrder.objects.filter(device_id=device_id):
+            if (order.start - now).year > 0:        # for the reserved devices doesn't start yet
+                if order.start <= start_time <= order.due or start_time <= order.start <= due_time:
+                    o = {}
+                    o['start'] = order.start
+                    o['due'] = order.due
+                    o['username'] = order.username
+                    o['contact'] = order.contact
+                    return JsonResponse({
+                        'error': 'illegal application for duration collision',
+                        'order': order
+                    })
         device_id = int(device_id)
         username = request.session['username']
         contact = models.User.objects.get(username=username).contact
@@ -280,6 +300,7 @@ def order_device(request):
             start=start,
             due=due,
             valid='waiting',
+            rent_state='default'
         )
         return JsonResponse({'ok': 'waiting for offer to agree the order'})
 
