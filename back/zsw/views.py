@@ -12,17 +12,17 @@ def login(request):
         password = request.POST.get('password')
         # 用户名参数不存在或者为空，或者此用户不存在
         if username == None or username == '' or not models.User.objects.filter(username=username).exists():
-            return JsonResponse({'error': 'no such a user'})
+            return JsonResponse({'state': 0})
         # 密码不匹配
         if check_password(password, models.User.objects.get(username=username).password):
-            return JsonResponse({'error': 'password is wrong'})
+            return JsonResponse({'state': 0})
         # 当前已经处于登录状态
         if 'is_login' in request.session and request.session['is_login']:
-            return JsonResponse({'error': 'has logged in'})
+            return JsonResponse({'state': 0})
 
         request.session['username'] = username
         request.session['is_login'] = True
-        return JsonResponse({'user': username})
+        return JsonResponse({'state': 0})
 
 
 # 1.3.4: for all users: logout
@@ -32,9 +32,9 @@ def logout(request):
             username = request.session['username']
             del request.session['is_login']
             del request.session['username']
-            return JsonResponse({'user': username})
+            return JsonResponse({'state': 1})   # success
         else:                   # session_id不存在或被注销
-            return JsonResponse({'error': 'no valid session'})
+            return JsonResponse({'state': 0})   # fail
 
 
 # 1.1.1: for admin: to get users under various filters
@@ -108,6 +108,7 @@ def set_user(request):
         userid = int(userid)
         user = models.User.objects.get(id=userid)
         user.identity = identity
+        user.save()
         return JsonResponse({'ok': 'set'})
 
 
@@ -190,6 +191,7 @@ def edit_device(request):
         for key, value in d:
             if value != None:
                 device[key] = value
+        device.save()
         return JsonResponse({'ok': 'edited'})
 
 
