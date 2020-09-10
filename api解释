@@ -1,3 +1,15 @@
+1.0查询自己信息
+Method:GET
+URL：/my
+QueryParam:
+{}
+Response:
+{
+	username:
+	userid:
+	identity:
+}
+
 学院平台助理(超级管理员)：
 
 ################################################ ZSW
