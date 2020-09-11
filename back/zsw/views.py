@@ -4,8 +4,6 @@ from django.http import HttpResponse
 from django.contrib.auth.hashers import make_password, check_password
 from django.utils import timezone
 from database import models
-from datetime import date
-import json
 
 
 # Create your views here.
@@ -371,6 +369,15 @@ def get_device_reserved_info(request):
         d['valid'] = device.valid
         d['reason'] = device.reason
         d['orderlist'] = []
+
+        for order in models.RentingOrder.objects.all():
+            o = {}
+            o['user'] = order.username
+            o['start'] = order.start
+            o['due'] = order.due
+            o['contact'] = order.contact
+            d['orderlist'].append(o)
+        return JsonResponse(d)
 
         for order in models.RentingOrder.objects.all():
             o = {}
