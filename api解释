@@ -19,8 +19,6 @@ URL：/boss/user/list
 QueryParam:
 {
 	'username': name(default ='')
-	'page': 1
-	'size': 20
 }
 Response:
 {
@@ -175,19 +173,7 @@ Response:{}
 
 ################################################ SZL
 5、用户申请成为设备提供者列表查看：
-5.1 用户申请成为设备提供者
-Method:POST
-URL：/boss/offer/apply
-Request:
-{
-	'userid': '101',
-	'reason': '',
-}
-Response:
-{
-	
-}
-5.2 查看设备提供者申请列表
+5.1 查看设备提供者申请列表
 Method:GET
 URL:/boss/offer/list
 Request:
@@ -206,7 +192,7 @@ Response:
 		'reason': '申请理由',
 	}
 }
-5.3 提供者申请审批:
+5.2 提供者申请审批:
 Method:GET
 URL：/boss/offer/state
 QueryParam:
@@ -216,7 +202,7 @@ QueryParam:
 }
 Response:{}
 
-5.4 删除租借申请：
+5.3 删除租借申请：
 Method:POST
 URL：/boss/offer/delete
 Request:
@@ -227,14 +213,48 @@ Response:{}
 
 ################################################ SZL
 6、上架设备审核
-通过2筛选未上架和未审核设备，admin在其页面提交是否通过审核
-Method:POST
-URL: /boss/device/audit
-Request:{
-	'audit': True/False,
-	'commit': ''# 具体回复
+6.1 管理员查看设备提供者设备上架申请
+Method:GET
+URL:/boss/shelf/list
+Request:
+{
+	#'page':'1',
+	#'size':'20',
+	'state':'waiting'/'passed'/'failed'/'none'
+}
+Response:
+{
+	'total':101,
+	'shelflist':[
+	{
+		'shelfid': 1 ,//申请唯一标识id
+		'ownername':'hahaha',//设备拥有者名字
+		'devicename':'zidongji',//设备的名字
+		'location':'东主楼',//设备所在地点
+		'addition':'设备的备注，或者说是详细信息',
+		'reason': '申请理由',
+		'state': 'on_order'
+	}
+	]
+}
+6.2 设备上架申请 审批
+Method:GET
+URL：/boss/shelf/state
+QueryParam:
+{
+	'shelfid': 1,
+	'state': 0/审核通过 1/未审核 2/审核未通过
 }
 Response:{}
+6.3 删除设备上架申请
+Method:POST
+URL：/boss/shelf/delete
+Request:
+{
+	'shelfid': '1',
+}
+Response:{}
+
 ################################################ SZL
 7、统计信息？再说吧
 Method:GET
@@ -300,8 +320,6 @@ Method:GET
 URL：/user/device/list
 QueryParam:
 {
-	'page': 1
-	'size': 20
 	'deviceid': '101' //设备标识符
 	'devicename': '设备名称' //可选
 }
@@ -327,11 +345,14 @@ Response:
 
 ################################################ ZSW
 3用户申请借设备
-Method:GET
+Method:POST
 URL：/user/device/lend
 QueryParam:
 {
 	'deviceid': '101' //设备标识符
+	'reason': '1'
+	'start': ''
+	'due': 
 }
 
 ################################################ ZSW
@@ -340,8 +361,8 @@ Method:GET
 URL：/user/order/history
 QueryParam:
 {
-	'page': 1
-	'size': 20
+	#'page': 1
+	#'size': 20
 }
 Response:
 {
@@ -367,8 +388,8 @@ Method:GET
 URL：/user/device/own
 QueryParam:
 {
-	'page': 1
-	'size': 20
+	#'page': 1
+	#'size': 20
 }
 Response:
 {
@@ -387,6 +408,44 @@ Response:
 		'reason':
 	}
 	]
+}
+
+6 用户申请成为设备提供者
+Method:POST
+URL：/user/apply
+Request:
+{
+    'userid': '101'
+    'reason': ''
+}
+Response:
+{
+    'message': 'ok'
+}
+
+7 用户查看某一台设备的预约信息(点击某设备，得到这个设备各项信息 以及各时段被预约的情况)
+Method: GET
+URL: /user/device/reserved
+QueryParam:
+{
+    'deviceid':'101'
+}
+Response:
+{
+    'devicename': '自动机',
+    'owner': 'fzr18',
+    'location': '东主楼',
+    'addition': '备注',
+    'valid':
+    'reason':
+    'orderlist':[
+        {
+            'user':'',
+            'start':'',
+            'due':'',
+            'contact':''
+        }
+    ]
 }
 
 ################################################ FZR(以下全为fzr)
@@ -484,6 +543,7 @@ QueryParam:
 	total: '101'
 	'devicelist':[
 	{
+		'deviceid': '1'
 		'orderid': '1' //申请唯一标识id
 		'devicename': '自动机',
 		'owner': 'fzr18',

@@ -1,9 +1,9 @@
 from django.shortcuts import render
 from django.http import JsonResponse
+from django.http import HttpResponse
 from django.contrib.auth.hashers import make_password, check_password
 from django.utils import timezone
 from database import models
-from datetime import date
 
 
 # Create your views here.
@@ -42,9 +42,10 @@ def logout(request):
 # 1.1.1: for admin: to get users under various filters
 def get_user(request):
     if request.method == 'GET':
-        admin = models.User.objects.get(username=request.session['username'])
-        if admin.identity != 'admin':
-            return JsonResponse({'error': 'low permission'})
+        # print('username' in request.session)
+        # admin = models.User.objects.get(username=request.session['username'])
+        # if admin.identity != 'admin':
+        #     return JsonResponse({'error': 'low permission'})
 
         username = request.GET.get('username')
         if not username:
@@ -61,6 +62,14 @@ def get_user(request):
             u['contact'] = user.contact
             u['email'] = user.email
             u_list.append(u)
+
+        # response = HttpResponse(json.dumps({
+        #     'total': total,
+        #     'userlist': u_list,
+        # }))
+        #
+        # return response
+
         return JsonResponse({
             'total': total,
             'userlist': u_list,
@@ -240,30 +249,38 @@ def order_device(request):
         due_time = date(year=int(due_list[0]), month=int(due_list[1]), day=int(start_list[2]))
         # to prevent illegal renting order resulting from duration collision
         now = timezone.now().date()
-        for order in models.RentingOrder.objects.filter(device_id=device_id):
-            if (order.start - now).year > 0:        # for the reserved devices doesn't start yet
-                if order.start <= start_time <= order.due or start_time <= order.start <= due_time:
-                    o = {}
-                    o['start'] = order.start
-                    o['due'] = order.due
-                    o['username'] = order.username
-                    o['contact'] = order.contact
-                    return JsonResponse({
-                        'error': 'illegal application for duration collision',
-                        'order': order
-                    })
+        for order in models.RentingOrder.objects.filter(device_id=device_id, valid='passed'):
+            # if order.start > now:         for the reserved devices doesn't start yet
+            # if not ((order.start < start_time and start_time < order.due) \
+            #         or (start_time < order.start and order.start< due_time)):
+            if not (order.due < start_time or due_time < order.start):
+                o = {}
+                o['start'] = order.start
+                o['due'] = order.due
+                o['username'] = order.username
+                o['contact'] = order.contact
+                return JsonResponse({
+                    'error': 'illegal application for duration collision',
+                    'order': o
+                })
         device_id = int(device_id)
         username = request.session['username']
         contact = models.User.objects.get(username=username).contact
+        print(start)
+        print(due)
+        print(type(start))
+        print(type(due))
         models.RentingOrder.objects.create(
             device_id=device_id,
             username=username,
             reason=reason,
             contact=contact,
-            start=start,
-            due=due,
+            start=start_time,
+            due=due_time,
             valid='waiting',
-            rent_state='default'
+            rent_state='default',
+            rent_start=start_time,
+            rent_end=start_time,
         )
         return JsonResponse({'ok': 'waiting for offer to agree the order'})
 

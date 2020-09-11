@@ -26,7 +26,7 @@ SECRET_KEY = 'iv+wpjei!*--ayqha@)nrd2e*28xb)-^dqwzhgufbz@42jgdr#'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -57,6 +57,11 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',  # 默认
     'django.middleware.clickjacking.XFrameOptionsMiddleware',  # 默认
     'django.middleware.common.CommonMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "back.middleware.SimpleMiddleware"
 ]
 
 ROOT_URLCONF = 'back.urls'
@@ -136,13 +141,11 @@ EMAIL_HOST_USER = '2691901778@qq.com' # 帐号
 EMAIL_HOST_PASSWORD = 'rjshdgzomyskdecd'  # 密码
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
-
-# 跨域增加忽略
 CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_ALLOW_ALL = True
-CORS_ORIGIN_WHITELIST = (
-    # '*'
-)
+# CORS_ORIGIN_WHITELIST = (
+#     '*'
+# )
 CORS_ALLOW_METHODS = (
     'DELETE',
     'GET',

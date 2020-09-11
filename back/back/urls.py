@@ -36,6 +36,7 @@ from zsw.views import order_device
 from zsw.views import get_order_history
 from zsw.views import get_self_rented_device
 from zsw.views import apply_to_be_offer
+from zsw.views import get_device_reserved_info
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -70,5 +71,6 @@ urlpatterns = [
     url(r'^user/device/lend$', order_device),
     url(r'^user/order/history$', get_order_history),
     url(r'^user/device/own$', get_self_rented_device),
-    url(r'^user/apply$', apply_to_be_offer)
+    url(r'^user/apply$', apply_to_be_offer),
+    url(r'^user/device/reserved$', get_device_reserved_info),
 ]

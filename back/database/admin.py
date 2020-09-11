@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, Device, RentingOrder, ShelfOrder, ApplyOrder
+from .models import User, Device, RentingOrder
 
 # Register your models here.
 admin.site.register(User)
