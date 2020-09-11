@@ -67,6 +67,7 @@ def get_user(request):
         })
 
 
+# TODO: test
 # 1.1.2: for admin: delete users
 def delete_user(request):
     if request.method == 'POST':
@@ -74,12 +75,16 @@ def delete_user(request):
         if admin.identity != 'admin':
             return JsonResponse({'error': 'low permission'})
 
-        userid = int(request.POST.get('userid'))
+        userid = request.POST.get('userid')
         if userid == None:
             return JsonResponse({'error': 'userid'})
+        userid = int(userid)
         if not models.User.objects.filter(id=userid).exists():
             return JsonResponse({'error': 'user non-existence'})
 
+        username = models.User.objects.get(id=userid)
+        if models.RentingOrder.objects.filter(username=username, rent_state='renting').exists():
+            return JsonResponse({'error': 'the user is using a device'})
         models.User.objects.get(id=userid).delete()
         return JsonResponse({'ok': 'deleted'})
 
@@ -169,6 +174,7 @@ def edit_device(request):
         return JsonResponse({'ok': 'edited'})
 
 
+# TODO: test
 # 1.2.3: for admin: to delete device
 def delete_device(request):
     if request.method == 'POST':
@@ -178,7 +184,9 @@ def delete_device(request):
         device_id = int(device_id)
         if not models.Device.objects.filter(id=device_id).exists():
             return JsonResponse({'error': 'deviceid invalid'})
-
+        device = models.Device.objects.get(id=device_id)
+        if device.valid == 'renting':
+            return JsonResponse({'error': 'device is rented'})
         models.Device.objects.get(id=device_id).delete()
         return JsonResponse({'ok': 'deleted'})
 
@@ -362,3 +370,22 @@ def get_device_reserved_info(request):
             d['orderlist'].append(o)
         return JsonResponse(d)
 
+
+# from a device id to detailed info of this device
+def get_single_device_info(request):
+    if request.method == 'GET':
+        device_id = request.GET.get('deviceid')
+        if not device_id:
+            return JsonResponse({'state': 0})
+        if not models.Device.objects.filter(id=device_id).exists():
+            return JsonResponse({'state': 0})
+        device = models.Device.objects.get(id=device_id)
+        d = {}
+        d['devicename'] = device.device_name
+        d['owner'] = device.owner
+        d['phone'] = device.owner_phone
+        d['location'] = device.location
+        d['addition'] = device.addition
+        d['valid'] = device.valid
+        d['reason'] = device.reason
+        return JsonResponse(d)
