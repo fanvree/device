@@ -445,7 +445,11 @@ def get_user_message(request):
             device = models.RentingOrder.objects.get(id=order.device_id)
             message['devicename'] = device.device_name
             message_list.append(message)
-        return JsonResponse({'message_list': message_list})
+        total = len(message_list)
+        return JsonResponse({
+            'total': total,
+            'message_list': message_list
+        })
 
 
 # get received message of owners(results of shelf orders)
@@ -462,3 +466,8 @@ def get_owner_message(request):
             device = models.Device.objects.get(id=order.device_id)
             message['devicename'] = device.device_name
             message_list.append(message)
+        total = len(message_list)
+        return JsonResponse({
+            'total': total,
+            'message_list': message_list
+        })
