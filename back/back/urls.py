@@ -82,5 +82,5 @@ urlpatterns = [
     url(r'^message/rent$', get_renting_message),
     url(r'^message/shelf$', get_shelf_message),
     url(r'^my$', my),
-    url(r'/boss/static$', views.Statistics)
+    url(r'^boss/static$', views.Statistics)
 ]

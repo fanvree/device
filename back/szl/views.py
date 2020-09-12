@@ -4,6 +4,8 @@ from django.shortcuts import render
 
 from django.http import JsonResponse
 from database import models
+import matplotlib.pyplot as plt
+import io
 
 def GetOrderList(request): #获得用户租借申请的列表
     if request.method == 'GET':
