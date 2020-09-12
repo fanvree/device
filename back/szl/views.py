@@ -237,5 +237,40 @@ def DeleteShelf(request):#删除上架申请
         return JsonResponse({'error':'require POST'})
 
 
+def Statistics(request):
+    labels='下架','在架','借出','等待审批'
+    num_off_shelf=0
+    num_on_shelf=0
+    num_renting=0
+    num_on_order=0
+    Devices=models.Device.objects.all()
+    for device in Devices:
+        valid=device.valid
+        if valid=='off_shelf':
+            num_off_shelf=num_off_shelf+1
+        elif valid=='on_shelf':
+            num_on_shelf=num_on_shelf+1
+        elif valid=='renting':
+            num_renting=num_renting+1
+        elif valid=='on_order':
+            num_on_order=num_on_order+1
+        else:
+            pass
+    num_sum=num_on_order+num_renting+num_on_shelf+num_off_shelf
+    sizes=[num_off_shelf*100/num_sum,num_on_shelf*100/num_sum,num_renting*100/num_sum,num_on_order*100/num_sum]
+    #sizes=[25,25,25,25]
+    explode=(0,0,0,0.1)
+    fig1,ax1=plt.subplots()
+    ax1.pie(sizes,explode=explode,labels=labels,
+            autopct='%1.1f%%',shadow=True,startangle=90)
+    ax1.axis('equal')
 
+    plt.show()
+    canvas=fig1.canvas
 
+    buffer=io.BytesIO()
+    canvas.print_png(buffer)
+    data=buffer.getvalue()
+    buffer.close()
+
+    return render({'pie':data})
