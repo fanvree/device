@@ -429,6 +429,8 @@ def get_application_message(request):
         user = models.User.objects.get(username=username)
         message_list = []
         for order in models.ApplyOrder.objects.filter(user_id=user.id):
+            if not models.ApplyOrder.objects.filter(id=order.device_id).exists():
+                continue
             message = {}
             message['type'] = 'ApplyOrder'
             message['state'] = order.state
@@ -447,9 +449,11 @@ def get_application_message(request):
 def get_renting_message(request):
     if request.method == 'GET':
         username = request.session['username']
-        user = models.User.objects.get(username=username)
+        # user = models.User.objects.get(username=username)
         message_list = []
         for order in models.RentingOrder.objects.filter(username=username):
+            if not models.RentingOrder.objects.filter(id=order.device_id).exists():
+                continue
             message = {}
             message['type'] = 'RentingOrder'
             message['state'] = order.valid
@@ -472,6 +476,8 @@ def get_shelf_message(request):
         # user = models.User.objects.get(username=username)
         message_list = []
         for order in models.ShelfOrder.objects.filter(owner_name=username):
+            if not models.ShelfOrder.objects.filter(id=order.device_id).exists():
+                continue
             message = {}
             message['state'] = order.state
             message['reason'] = order.reason
