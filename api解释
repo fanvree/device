@@ -563,6 +563,8 @@ QueryParam:
 # 改变orderid订单状态：state 'passed','failed','waited'
 # 'rentstate':'default' 'renting'  'back'
 
+
+
 Method:GET
 URL：/owner/device/order/change
 QueryParam:
@@ -570,6 +572,37 @@ QueryParam:
 	orderid:'101',
 	state: 可选
 	rentstate： 可选
+}
+
+
+#####################################  ZSW
+Method: GET
+Url: /user/message
+QueryParam:
+{
+	"userid": 101	# 如果能找乙宁解决昨天我们遇到的那个问题 这个userid就可以不带 目前先带着吧
+}
+Response:
+{
+	"type": "RentingOrder"/"ApplyOrder"	# 前者为租借申请 后者为成为设备提供者的申请
+	"state": "failed"/"passed"
+	"reason": ""		# 申请时的理由（而非通过或拒绝理由）
+	"devicename": "自动机"/""	# 成为设备提供者时该项值为""
+}
+
+
+#####################################  ZSW
+Method: GET
+Url: /owner/message
+QueryParam:
+{
+	"userid": 101	# 如果能找乙宁解决昨天我们遇到的那个问题 这个userid就可以不带 目前先带着吧
+}
+Response:
+{
+	"state": "failed"/"passed"
+	"reason": ""		# 申请时的理由（而非通过或拒绝理由）
+	"devicename": "自动机"
 }
 
 
