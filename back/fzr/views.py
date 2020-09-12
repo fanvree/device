@@ -286,7 +286,7 @@ def owner_device_order_change(request):
 
 
 def my(request):
-    print(request.session)
+    print(request.session.keys())
     if not ('username' in request.session):
         return JsonResponse({'state': 0})
     username = request.session['username']
