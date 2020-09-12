@@ -303,6 +303,8 @@ def get_order_history(request):
         username = request.session['username']
         order_list = models.RentingOrder.objects.filter(username=username)
         total = len(order_list)
+        print(total)
+        print(len(models.RentingOrder.objects.all()))
         o_list = []
         for order in order_list:
             device = models.Device.objects.get(id=order.device_id)
