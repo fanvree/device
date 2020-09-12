@@ -495,8 +495,19 @@ Response:
 }
 
 
-2.3删除设备：（valid=delete）
 2.4上架设备：（）
+Method:GET
+URL：/owner/device/waiting
+QueryParam:
+{
+	'deviceid': '101',
+	'reason':
+}
+Response:
+{
+}
+
+2.3删除设备：（valid=delete）
 2.5下架设备：（）
 # 改变我的设备状态valid：on_shelf on_order off_shelf renting   delete(删除设备)
 Method:GET
@@ -575,31 +586,37 @@ Method: GET
 Url: /user/message
 QueryParam:
 {
-	"userid": 101	# 如果能找乙宁解决昨天我们遇到的那个问题 这个userid就可以不带 目前先带着吧
 }
 Response:
 {
-	"type": "RentingOrder"/"ApplyOrder"	# 前者为租借申请 后者为成为设备提供者的申请
-	"state": "failed"/"passed"
-	"reason": ""		# 申请时的理由（而非通过或拒绝理由）
-	"devicename": "自动机"/""	# 成为设备提供者时该项值为""
+	"message_list": [
+		{
+			"type": "RentingOrder"/"ApplyOrder"	# 前者为租借申请 后者为成为设备提供者的申请
+			"state": "failed"/"passed"
+			"reason": ""		# 申请时的理由（而非通过或拒绝理由）
+			"devicename": "自动机"/""	# 成为设备提供者时该项值为""
+			"deviceid": 101
+		}
+	]
 }
-
 
 #####################################  ZSW
 Method: GET
 Url: /owner/message
 QueryParam:
 {
-	"userid": 101	# 如果能找乙宁解决昨天我们遇到的那个问题 这个userid就可以不带 目前先带着吧
 }
 Response:
 {
-	"state": "failed"/"passed"
-	"reason": ""		# 申请时的理由（而非通过或拒绝理由）
-	"devicename": "自动机"
+	"message_list": [
+		{
+			"state": "failed"/"passed"
+			"reason": ""		# 申请时的理由（而非通过或拒绝理由）
+			"devicename": "自动机"
+			"deviceid": 101
+		}
+	]
 }
-
 
 
 
