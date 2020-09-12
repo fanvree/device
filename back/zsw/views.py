@@ -266,7 +266,7 @@ def order_device(request):
             if not (order.due < start_time or due_time < order.start):
                 o = {}
                 o['start'] = str(order.start.year) + '-' + str(order.start.month) + '-' + str(order.start.day)
-                o['due'] = order.due
+                o['due'] = str(order.due.year) + '-' + str(order.due.month) + '-' + str(order.due.day)
                 o['username'] = order.username
                 o['contact'] = order.contact
                 return JsonResponse({
@@ -311,8 +311,8 @@ def get_order_history(request):
             o['devicename'] = device.device_name
             o['owner'] = device.owner
             o['user'] = order.username
-            o['start'] = order.start
-            o['due'] = order.due
+            o['start'] = str(order.start.year) + '-' + str(order.start.month) + '-' + str(order.start.day)
+            o['due'] = str(order.due.year) + '-' + str(order.due.month) + '-' + str(order.due.day)
             o['location'] = device.location
             o['addition'] = device.addition
             o['state'] = order.valid
@@ -383,8 +383,8 @@ def get_device_reserved_info(request):
         for order in models.RentingOrder.objects.all():
             o = {}
             o['user'] = order.username
-            o['start'] = order.start
-            o['due'] = order.due
+            o['start'] = str(order.start.year) + '-' + str(order.start.month) + '-' + str(order.start.day)
+            o['due'] = str(order.due.year) + '-' + str(order.due.month) + '-' + str(order.due.day)
             o['contact'] = order.contact
             d['orderlist'].append(o)
         print("333")
