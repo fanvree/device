@@ -148,6 +148,11 @@ def owner_device_add(request):
         return JsonResponse({'state': 1})
 
 
+def owner_device_waiting(request):
+
+    pass
+
+
 # 改变我的设备状态：
 def owner_device_change(request):
     if request.method == 'GET' and 'deviceid' in request.GET and 'valid' in request.GET:
