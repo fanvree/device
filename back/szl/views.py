@@ -156,7 +156,7 @@ def ChangeOfferState(request):#改变用户申请成为设备提供者的状态�
 def DeleteOffer(request):#删除用户成为设备提供者的申请
     if request.method=='POST':
         offerid=request.POST.get('offerid')
-        offer=models.ApplyOrder.objects.get(id=offerid)
+        offer=models.ApplyOrder.objects.filter(id=offerid)
         offer.delete()
         return JsonResponse({"message": "ok"})
     else:
@@ -182,8 +182,10 @@ def GetShelfList(request):#得到设备上架请求列表
             part_answer={}
             part_answer['shelfid']=shelf.id
             part_answer['ownername']=shelf.owner_name
-
-            device=models.Device.objects.get(id=shelf.device_id)
+            if models.Device.objects.filter(id=shelf.device_id).exists():
+                device=models.Device.objects.get(id=shelf.device_id)
+            else:
+                continue
             part_answer['devicename']=device.device_name
             part_answer['location']=device.location
             part_answer['addition']=device.addition
