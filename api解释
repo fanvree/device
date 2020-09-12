@@ -661,6 +661,43 @@ Response:
 }
 
 
+############################### ZSW
+# 发送留言
+Method: POST
+Url: /comment/send
+Request:
+{
+	'userid_from': 101,
+	'userid_to': 102,
+	'content': '',
+}
+Response:
+{
+	'state': 0/1			# 为了调试方便错误时有可能会返回'error': 'xxxx'，最终会统一修改
+}
+
+
+############################### ZSW
+# 展示某人收到的留言列表
+Method: GET
+Url: /comment/received
+Request:
+{
+}
+Response:
+{
+	'comment_list':[
+		{
+			'username_from': 'yxr18',
+			'comment': '你笑起来真好看',
+			'time':'xxxx-xx-xx xx:xx:xx'
+		}
+	]
+}
+
+
+
+
 
 
 
