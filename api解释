@@ -578,13 +578,16 @@ QueryParam:
 }
 Response:
 {
-	"type": "RentingOrder"/"ApplyOrder"	# 前者为租借申请 后者为成为设备提供者的申请
-	"state": "failed"/"passed"
-	"reason": ""		# 申请时的理由（而非通过或拒绝理由）
-	"devicename": "自动机"/""	# 成为设备提供者的申请该项值为""
-	"deviceid": 101		# 成为设备提供者的申请该项值为0
+	"message_list": [
+		{
+			"type": "RentingOrder"/"ApplyOrder"	# 前者为租借申请 后者为成为设备提供者的申请
+			"state": "failed"/"passed"
+			"reason": ""		# 申请时的理由（而非通过或拒绝理由）
+			"devicename": "自动机"/""	# 成为设备提供者时该项值为""
+			"deviceid": 101
+		}
+	]
 }
-
 
 #####################################  ZSW
 Method: GET
@@ -594,12 +597,15 @@ QueryParam:
 }
 Response:
 {
-	"state": "failed"/"passed"
-	"reason": ""		# 申请时的理由（而非通过或拒绝理由）
-	"devicename": "自动机"
-	"deviceid": 101
+	"message_list": [
+		{
+			"state": "failed"/"passed"
+			"reason": ""		# 申请时的理由（而非通过或拒绝理由）
+			"devicename": "自动机"
+			"deviceid": 101
+		}
+	]
 }
-
 
 
 
