@@ -422,8 +422,8 @@ def get_single_device_info(request):
         return JsonResponse(d)
 
 
-# get received messages of users(results of apply orders and renting orders)
-def get_user_message(request):
+# get application messages of users(normal users and device providers)
+def get_application_message(request):
     if request.method == 'GET':
         username = request.session['username']
         user = models.User.objects.get(username=username)
@@ -436,6 +436,19 @@ def get_user_message(request):
             message['devicename'] = ''
             message['deviceid'] = 0
             message_list.append(message)
+        total = len(message_list)
+        return JsonResponse({
+            'total': total,
+            'message_list': message_list
+        })
+
+
+# get renting messages of users(normal users and device providers)
+def get_renting_message(request):
+    if request.method == 'GET':
+        username = request.session['username']
+        user = models.User.objects.get(username=username)
+        message_list = []
         for order in models.RentingOrder.objects.filter(username=username):
             message = {}
             message['type'] = 'RentingOrder'
@@ -452,8 +465,8 @@ def get_user_message(request):
         })
 
 
-# get received message of owners(results of shelf orders)
-def get_owner_message(request):
+# get shelf messages of device providers
+def get_shelf_message(request):
     if request.method == 'GET':
         username = request.session['username']
         # user = models.User.objects.get(username=username)
