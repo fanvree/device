@@ -388,24 +388,19 @@ Method:GET
 URL：/user/device/own
 QueryParam:
 {
-	#'page': 1
-	#'size': 20
+	"page": 1
+	"size": 20
 }
 Response:
 {
-	'total':'101',
-	'devicelist':[
+	"total":"101",
+	"devicelist":[
 	{
-		'orderid': '1' //申请唯一标识id
-		'devicename': '自动机',
-		'owner': 'fzr18',
-		'user': 'yxr18',
-		'start':'2018年1月1日',
-		'due': '2018年1月1日',  //借用结束时间，前端对即将到期的设备给出提示
-		'location': '东主楼',
-		'addition': '备注',
-		'valid':0/已经上架但未外借 1/未审核 2/未上架 3/已外借
-		'reason':
+		"devicename": "自动机",
+		"owner": "fzr18",
+		"location": "东主楼",
+		"addition": "备注",
+		"time_to_expiration": 0/1/-1,	# 0: 即将过期 正数：还有几天过期 负数：过期几天
 	}
 	]
 }
