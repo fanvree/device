@@ -54,5 +54,3 @@ class ApplyOrder(models.Model):
     user_id = models.CharField(max_length=64, default=None)
     reason = models.TextField(max_length=2000, default=None)
     state = models.CharField(max_length=64, default=None)
-    #failed passed waiting 默认waiting、
-

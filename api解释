@@ -19,8 +19,6 @@ URL：/boss/user/list
 QueryParam:
 {
 	'username': name(default ='')
-	'page': 1
-	'size': 20
 }
 Response:
 {
@@ -175,19 +173,7 @@ Response:{}
 
 ################################################ SZL
 5、用户申请成为设备提供者列表查看：
-5.1 用户申请成为设备提供者
-Method:POST
-URL：/boss/offer/apply
-Request:
-{
-	'userid': '101',
-	'reason': '',
-}
-Response:
-{
-	
-}
-5.2 查看设备提供者申请列表
+5.1 查看设备提供者申请列表
 Method:GET
 URL:/boss/offer/list
 Request:
@@ -206,7 +192,7 @@ Response:
 		'reason': '申请理由',
 	}
 }
-5.3 提供者申请审批:
+5.2 提供者申请审批:
 Method:GET
 URL：/boss/offer/state
 QueryParam:
@@ -216,7 +202,11 @@ QueryParam:
 }
 Response:{}
 
+<<<<<<< HEAD
 5.4 删除提供者申请：
+=======
+5.3 删除租借申请：
+>>>>>>> 25db6b87f0987a4efcaf23d95bdd29e0ae8a3dff
 Method:POST
 URL：/boss/offer/delete
 Request:
@@ -247,6 +237,10 @@ Response:
 		'location':'东主楼',//设备所在地点
 		'addition':'设备的备注，或者说是详细信息',
 		'reason': '申请理由',
+<<<<<<< HEAD
+=======
+		'state': 'on_order'
+>>>>>>> 25db6b87f0987a4efcaf23d95bdd29e0ae8a3dff
 	}
 	]
 }
@@ -268,8 +262,12 @@ Request:
 }
 Response:{}
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 =======
+=======
+
+>>>>>>> 25db6b87f0987a4efcaf23d95bdd29e0ae8a3dff
 ################################################ SZL
 >>>>>>> b2545e3391e3034256a40140826e5d58cb692f7b
 7、统计信息？再说吧
@@ -336,8 +334,6 @@ Method:GET
 URL：/user/device/list
 QueryParam:
 {
-	'page': 1
-	'size': 20
 	'deviceid': '101' //设备标识符
 	'devicename': '设备名称' //可选
 }
@@ -363,11 +359,14 @@ Response:
 
 ################################################ ZSW
 3用户申请借设备
-Method:GET
+Method:POST
 URL：/user/device/lend
 QueryParam:
 {
 	'deviceid': '101' //设备标识符
+	'reason': '1'
+	'start': ''
+	'due': 
 }
 
 ################################################ ZSW
@@ -376,8 +375,8 @@ Method:GET
 URL：/user/order/history
 QueryParam:
 {
-	'page': 1
-	'size': 20
+	#'page': 1
+	#'size': 20
 }
 Response:
 {
@@ -403,26 +402,59 @@ Method:GET
 URL：/user/device/own
 QueryParam:
 {
-	'page': 1
-	'size': 20
+	"page": 1
+	"size": 20
 }
 Response:
 {
-	'total':'101',
-	'devicelist':[
+	"total":"101",
+	"devicelist":[
 	{
-		'orderid': '1' //申请唯一标识id
-		'devicename': '自动机',
-		'owner': 'fzr18',
-		'user': 'yxr18',
-		'start':'2018年1月1日',
-		'due': '2018年1月1日',  //借用结束时间，前端对即将到期的设备给出提示
-		'location': '东主楼',
-		'addition': '备注',
-		'valid':0/已经上架但未外借 1/未审核 2/未上架 3/已外借
-		'reason':
+		"devicename": "自动机",
+		"owner": "fzr18",
+		"location": "东主楼",
+		"addition": "备注",
+		"time_to_expiration": 0/1/-1,	# 0: 即将过期 正数：还有几天过期 负数：过期几天
 	}
 	]
+}
+
+6 用户申请成为设备提供者
+Method:POST
+URL：/user/apply
+Request:
+{
+    'userid': '101'
+    'reason': ''
+}
+Response:
+{
+    'message': 'ok'
+}
+
+7 用户查看某一台设备的预约信息(点击某设备，得到这个设备各项信息 以及各时段被预约的情况)
+Method: GET
+URL: /user/device/reserved
+QueryParam:
+{
+    'deviceid':'101'
+}
+Response:
+{
+    'devicename': '自动机',
+    'owner': 'fzr18',
+    'location': '东主楼',
+    'addition': '备注',
+    'valid':
+    'reason':
+    'orderlist':[
+        {
+            'user':'',
+            'start':'',
+            'due':'',
+            'contact':''
+        }
+    ]
 }
 
 ################################################ FZR(以下全为fzr)
@@ -520,6 +552,7 @@ QueryParam:
 	total: '101'
 	'devicelist':[
 	{
+		'deviceid': '1'
 		'orderid': '1' //申请唯一标识id
 		'devicename': '自动机',
 		'owner': 'fzr18',
@@ -539,6 +572,8 @@ QueryParam:
 # 改变orderid订单状态：state 'passed','failed','waited'
 # 'rentstate':'default' 'renting'  'back'
 
+
+
 Method:GET
 URL：/owner/device/order/change
 QueryParam:
@@ -546,6 +581,37 @@ QueryParam:
 	orderid:'101',
 	state: 可选
 	rentstate： 可选
+}
+
+
+#####################################  ZSW
+Method: GET
+Url: /user/message
+QueryParam:
+{
+	"userid": 101	# 如果能找乙宁解决昨天我们遇到的那个问题 这个userid就可以不带 目前先带着吧
+}
+Response:
+{
+	"type": "RentingOrder"/"ApplyOrder"	# 前者为租借申请 后者为成为设备提供者的申请
+	"state": "failed"/"passed"
+	"reason": ""		# 申请时的理由（而非通过或拒绝理由）
+	"devicename": "自动机"/""	# 成为设备提供者时该项值为""
+}
+
+
+#####################################  ZSW
+Method: GET
+Url: /owner/message
+QueryParam:
+{
+	"userid": 101	# 如果能找乙宁解决昨天我们遇到的那个问题 这个userid就可以不带 目前先带着吧
+}
+Response:
+{
+	"state": "failed"/"passed"
+	"reason": ""		# 申请时的理由（而非通过或拒绝理由）
+	"devicename": "自动机"
 }
 
 

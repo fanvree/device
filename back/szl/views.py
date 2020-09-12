@@ -4,14 +4,19 @@ from django.shortcuts import render
 
 from django.http import JsonResponse
 from database import models
+import numpy as np
+from scipy import stats
+import matplotlib.pyplot as plt
+import io
+import PIL
+from PIL import Image,ImageFont,ImageDraw
+from flask import request
 
 def GetOrderList(request): #获得用户租借申请的列表
     if request.method == 'GET':
-        #page = request.GET.get('page')
-        #size = request.GET.get('size')
         valid = request.GET.get('valid')
         answer_list = []  #最终返回的列表
-        #order_list，根据valid信息取出来RentingOrder列表
+        # order_list，根据valid信息取出来RentingOrder列表
         if valid == 'passed':
             order_list = models.RentingOrder.objects.filter(valid='passed')
         elif valid == 'failed':
@@ -32,8 +37,9 @@ def GetOrderList(request): #获得用户租借申请的列表
             part_answer['start'] = order.start
             part_answer['due']=order.due
             part_answer['location']=device.location
-            part_answer['addition']=device.addition
-            part_answer['state']=device.valid
+            # part_answer['addition']=device.addition
+            part_answer['addition']=order.reason
+            part_answer['valid']=order.valid
 
             answer_list.append(part_answer)
         total = len(answer_list)
@@ -44,20 +50,22 @@ def GetOrderList(request): #获得用户租借申请的列表
 def ChangeOrderState(request): #改变RentingOrder的状态
     if request.method=='GET':
         orderid=request.GET.get('orderid')
-        state=request.GET.get('state')
+        state=int(request.GET.get('state'))
 
         order=models.RentingOrder.objects.get(id=orderid)
         device=models.Device.objects.get(id=order.device_id)
-
+        print(orderid,' ',state)
         if state==0:#改变device的valid和user
             order.valid='passed'
-            device.valid='renting'
-            device.user=order.username
+            #device.valid='renting'
+            #device.user=order.username
         elif state==1:#如果是等待或者失败则不更改device的状态
             order.valid='waiting'
         elif state==2:
             order.valid='failed'
-
+        print(orderid, ' ',order.valid)
+        order.save()
+        device.save()
         return JsonResponse({'message':'ok'})
     else:
         return JsonResponse({'error': 'require GET'})
@@ -68,6 +76,7 @@ def DeleteOrder(request):#删除RentingOrder。所做的操作只是删除
         order=models.RentingOrder.objects.get(id=orderid)
         if order:
             order.delete()
+            return JsonResponse({'message':'ok'})
         else:
             return JsonResponse({'error':'order does not exist'})
     else:
@@ -103,6 +112,7 @@ def ChangeOfferState(request):#改变用户申请成为设备提供者的状态�
     if request.method=='GET':
         offerid=request.GET.get('offerid')
         state=request.GET.get('state')
+        print(offerid,state)
         offer=models.ApplyOrder.objects.get(id=offerid)
         user=models.User.objects.get(id=offer.user_id)
         if state==0:#改变user的identitiy
@@ -122,9 +132,9 @@ def ChangeOfferState(request):#改变用户申请成为设备提供者的状态�
 def DeleteOffer(request):#删除用户成为设备提供者的申请
     if request.method=='POST':
         offerid=request.POST.get('offerid')
-        offer=models.ApplyOrder.get(id=offerid)
+        offer=models.ApplyOrder.objects.get(id=offerid)
         offer.delete()
-        return JsonResponse({})
+        return JsonResponse({"message": "ok"})
     else:
         return JsonResponse({'error': 'require POST'})
 
@@ -164,8 +174,12 @@ def GetShelfList(request):#得到设备上架请求列表
 def ChangeShelfState(request):#状态变化请求
     if request.method=='GET':
         shelfid=request.GET.get('shelfid')
-        state=request.GET.get('state')
+        state=int(request.GET.get('state'))
+        if not models.ShelfOrder.objects.filter(id=shelfid).exists():
+            return JsonResponse({"error": "no exists"})
         shelf=models.ShelfOrder.objects.get(id=shelfid)
+        if not models.Device.objects.filter(id=shelf.device_id).exists():
+            return JsonResponse({"error": "no exists"})
         device=models.Device.objects.get(id=shelf.device_id)
         if state==0:
             shelf.state='passed'
@@ -178,6 +192,8 @@ def ChangeShelfState(request):#状态变化请求
             device.valid='off_shelf'#如果被拒绝，下架状态
         else:
             pass
+        shelf.save()
+        device.save()
         return JsonResponse({'message':'ok'})
     else:
         return JsonResponse({'error':'require GET'})
@@ -185,13 +201,51 @@ def ChangeShelfState(request):#状态变化请求
 def DeleteShelf(request):#删除上架申请
     if request.method=='POST':
         shelfid=request.POST.get('shelfid')
+        if not models.ShelfOrder.objects.filter(id=shelfid).exists():
+            return JsonResponse({'error': 'no shelfid'})
         shelf=models.ShelfOrder.objects.get(id=shelfid)
         shelf.delete()
         return JsonResponse({'message':'ok'})
     else:
         return JsonResponse({'error':'require POST'})
 
+def Statistics(request):
+    labels='下架','在架','借出','等待审批'
+    num_off_shelf=0
+    num_on_shelf=0
+    num_renting=0
+    num_on_order=0
+    Devices=models.Device.objects.all()
+    for device in Devices:
+        valid=device.valid
+        if valid=='off_shelf':
+            num_off_shelf=num_off_shelf+1
+        elif valid=='on_shelf':
+            num_on_shelf=num_on_shelf+1
+        elif valid=='renting':
+            num_renting=num_renting+1
+        elif valid=='on_order':
+            num_on_order=num_on_order+1
+        else:
+            pass
+    num_sum=num_on_order+num_renting+num_on_shelf+num_off_shelf
+    sizes=[num_off_shelf*100/num_sum,num_on_shelf*100/num_sum,num_renting*100/num_sum,num_on_order*100/num_sum]
+    #sizes=[25,25,25,25]
+    explode=(0,0,0,0.1)
+    fig1,ax1=plt.subplots()
+    ax1.pie(sizes,explode=explode,labels=labels,
+            autopct='%1.1f%%',shadow=True,startangle=90)
+    ax1.axis('equal')
 
+    plt.show()
+    canvas=fig1.canvas
+
+    buffer=io.BytesIO()
+    canvas.print_png(buffer)
+    data=buffer.getvalue()
+    buffer.close()
+
+    return render({'pie':data})
 
 
 
