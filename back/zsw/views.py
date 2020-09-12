@@ -265,7 +265,7 @@ def order_device(request):
             #         or (start_time < order.start and order.start< due_time)):
             if not (order.due < start_time or due_time < order.start):
                 o = {}
-                o['start'] = order.start
+                o['start'] = str(order.start.year) + '-' + str(order.start.month) + '-' + str(order.start.day)
                 o['due'] = order.due
                 o['username'] = order.username
                 o['contact'] = order.contact
@@ -326,36 +326,22 @@ def get_order_history(request):
 def get_self_rented_device(request):
     if request.method == 'GET':
         username = request.session['username']
-        device_list = models.Device.objects.filter(user=username)
-
-        total = len(device_list)
-        d_list = []
-        for device in device_list:
+        order_list = models.RentingOrder.objects.filter(username=username, rent_state='renting')
+        total = len(order_list)
+        device_list = []
+        for order in order_list:
+            device = models.Device.objects.get(id=order.device_id)
             d = {}
-            d['deviceid'] = device.id
             d['devicename'] = device.device_name
             d['owner'] = device.owner
-            d['phone'] = device.owner_phone
             d['location'] = device.location
             d['addition'] = device.addition
-            d['valid'] = device.valid
-            d['reason'] = device.reason
-            d['orderlist'] = []
-            d_list.append(d)
-        for order in models.RentingOrder.objects.all():
-            for d in d_list:
-                if order.device_id == d['deviceid']:
-                    o = {}
-                    o['username'] = order.username
-                    o['reason'] = order.reason
-                    o['contact'] = order.contact
-                    o['start'] = order.start
-                    o['due'] = order.due
-                    o['valid'] = o['valid']
-                    d['orderlist'].append(o)
+            time_delta = order.due - date.today()
+            d['time_to_expiration'] = time_delta.days
+            device_list.append(d)
         return JsonResponse({
             'total': total,
-            'devicelist': d_list,
+            'devicelist': device_list,
         })
 
 
