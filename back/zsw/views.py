@@ -25,8 +25,7 @@ def login(request):
 
         request.session['username'] = username
         request.session['is_login'] = True
-        return JsonResponse({'state': 1,'identity': models.User.objects.get(username=username).identity})
-    return JsonResponse({'state': 0,'identity': 'none'})
+        return JsonResponse({'state': 1, 'identity': models.User.objects.get(username=username).identity})
 
 
 # 1.3.4: for all users: logout
@@ -128,7 +127,7 @@ def set_user(request):
         userid = int(userid)
         user = models.User.objects.get(id=userid)
         user.identity = identity
-        print(userid,identity)
+        print(userid, identity)
         user.save()
         return JsonResponse({'ok': 'set'})
 
@@ -137,9 +136,9 @@ def set_user(request):
 def get_device(request):
     if request.method == 'GET':
         admin = models.User.objects.get(username=request.session['username'])
-
         if admin.identity == 'normal':
             return JsonResponse({'error': 'low permission'})
+
         valid = request.GET.get('valid') if request.GET.get('valid') != None else 'none'
         device_name = request.GET.get('devicename')
         print(device_name)
@@ -288,13 +287,8 @@ def order_device(request):
                     'order': o
                 })
         device_id = int(device_id)
-        print(request.session)
         username = request.session['username']
         contact = models.User.objects.get(username=username).contact
-        print(start)
-        print(due)
-        print(type(start))
-        print(type(due))
         models.RentingOrder.objects.create(
             device_id=device_id,
             username=username,
@@ -321,6 +315,8 @@ def get_order_history(request):
         print(len(models.RentingOrder.objects.all()))
         o_list = []
         for order in order_list:
+            if not models.Device.objects.filter(id=order.device_id).exists():
+                continue
             device = models.Device.objects.get(id=order.device_id)
             o = {}
             o['orderid'] = order.id
@@ -347,6 +343,8 @@ def get_self_rented_device(request):
         total = len(order_list)
         device_list = []
         for order in order_list:
+            if not models.Device.objects.filter(id=order.device_id).exists():
+                continue
             device = models.Device.objects.get(id=order.device_id)
             d = {}
             d['devicename'] = device.device_name
@@ -370,7 +368,7 @@ def apply_to_be_offer(request):
         if user_id == None or reason == None:
             return JsonResponse({'error': 'parameters missing'})
         user_id = int(user_id)
-        if user_id != models.User.objects.get(id=request.session['username']):
+        if user_id != models.User.objects.get(username=request.session['username']).id:
             return JsonResponse({'error': 'invalid user id'})
         models.ApplyOrder.objects.create(user_id=user_id, reason=reason, state='waiting')
         return JsonResponse({'ok': 'submitted'})
