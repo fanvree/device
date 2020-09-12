@@ -216,7 +216,7 @@ def owner_order_list(request):
                 owner = device.owner
                 device_name = device.device_name
                 location = device.location
-                if (True or  owner == request.session['username']) and \
+                if (owner == request.session['username']) and \
                         (device_id == -1 or device_id == renting_order.device_id) and \
                         (valid == 'none' or valid == renting_order.valid) and \
                         (rent_state == 'none' or rent_state == renting_order.rent_state):

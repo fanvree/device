@@ -44,6 +44,22 @@ def GetOrderList(request): #获得用户租借申请的列表
     else:
         return JsonResponse({'error':'require GET'})
 
+
+def conflict(start_time, due_time, device_id):
+    for order in models.RentingOrder.objects.filter(device_id=device_id, valid='passed'):
+        if not (order.due < start_time or due_time < order.start):
+            o = {}
+            o['start'] = str(order.start.year) + '-' + str(order.start.month) + '-' + str(order.start.day)
+            o['due'] = str(order.due.year) + '-' + str(order.due.month) + '-' + str(order.due.day)
+            o['username'] = order.username
+            o['contact'] = order.contact
+            return JsonResponse({
+                'error': 'illegal application for duration collision',
+                'order': o
+            })
+    return False
+
+
 def ChangeOrderState(request): #改变RentingOrder的状态
     if request.method=='GET':
         orderid=request.GET.get('orderid')
@@ -53,6 +69,8 @@ def ChangeOrderState(request): #改变RentingOrder的状态
         device=models.Device.objects.get(id=order.device_id)
         print(orderid,' ',state)
         if state==0:#改变device的valid和user
+            if conflict(order.start, order.due, device) != False:
+                return conflict(order.start, order.due, device)
             order.valid='passed'
             device.valid='renting'
             device.user=order.username
