@@ -117,7 +117,8 @@ def GetOfferList(request):#查看设备提供者申请列表
             if models.User.objects.filter(id=offer.user_id).exists():
                 part_answer['applicant'] = models.User.objects.get(id=offer.user_id).username
             else:
-                part_answer['applicant'] = '用户' + str(offer.user_id) + '已经删除'
+                continue
+                # part_answer['applicant'] = '用户' + str(offer.user_id) + '已经删除'
             part_answer['reason']=offer.reason
             answer_list.append(part_answer)
         total=len(answer_list)
@@ -130,9 +131,11 @@ def GetOfferList(request):#查看设备提供者申请列表
 def ChangeOfferState(request):#改变用户申请成为设备提供者的状态，
     if request.method=='GET':
         offerid=request.GET.get('offerid')
-        state=request.GET.get('state')
+        state=int(request.GET.get('state'))
         print(offerid,state)
         offer=models.ApplyOrder.objects.get(id=offerid)
+        if not models.User.objects.filter(id=offer.user_id).exists():
+            return JsonResponse({"message": "error"})
         user=models.User.objects.get(id=offer.user_id)
         if state==0:#改变user的identitiy
             offer.state='passed'
@@ -142,8 +145,10 @@ def ChangeOfferState(request):#改变用户申请成为设备提供者的状态�
         elif state==2:
             offer.state='failed'
         else:
+            print("nochange")
             pass
-
+        offer.save()
+        user.save()
         return JsonResponse({})
     else:
         return JsonResponse({'error': 'require GET'})
@@ -159,9 +164,9 @@ def DeleteOffer(request):#删除用户成为设备提供者的申请
 
 def GetShelfList(request):#得到设备上架请求列表
     if request.method=='GET':
-        #page=request.GET.get('page')
-        #size=request.GET.get('size')
-        state=request.GET.get('state')
+        # page=request.GET.get('page')
+        # size=request.GET.get('size')
+        state = request.GET.get('state')
 
         if state=='waiting':
             tmp_shelf_list=models.ShelfOrder.objects.filter(state='waiting')

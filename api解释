@@ -589,9 +589,10 @@ QueryParam:
 }
 
 
-#####################################  ZSW
+############################### ZSW
+# 普通用户和设备提供者显示
 Method: GET
-Url: /user/message
+Url: /message/apply
 QueryParam:
 {
 }
@@ -599,7 +600,6 @@ Response:
 {
 	"message_list": [
 		{
-			"type": "RentingOrder"/"ApplyOrder"	# 前者为租借申请 后者为成为设备提供者的申请
 			"state": "failed"/"passed"
 			"reason": ""		# 申请时的理由（而非通过或拒绝理由）
 			"devicename": "自动机"/""	# 成为设备提供者时该项值为""
@@ -608,9 +608,10 @@ Response:
 	]
 }
 
-#####################################  ZSW
+############################### ZSW
+# 普通用户和设备提供者
 Method: GET
-Url: /owner/message
+Url: /message/rent
 QueryParam:
 {
 }
@@ -625,6 +626,27 @@ Response:
 		}
 	]
 }
+
+############################### ZSW
+# 设备提供者
+Method: GET
+Url: /massage/shelf
+QueryParam:
+{
+}
+Response:
+{
+	"message_list": [
+		{
+			"state": "failed"/"passed"
+			"reason": ""		# 申请时的理由（而非通过或拒绝理由）
+			"devicename": "自动机"
+			"deviceid": 101
+		}
+	]
+}
+
+
 
 
 
