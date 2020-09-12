@@ -1,7 +1,9 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.contrib.auth.hashers import make_password, check_password
+from django.utils import timezone
 from database import models
+from datetime import date
 
 
 # Create your views here.
@@ -12,17 +14,17 @@ def login(request):
         password = request.POST.get('password')
         # 用户名参数不存在或者为空，或者此用户不存在
         if username == None or username == '' or not models.User.objects.filter(username=username).exists():
-            return JsonResponse({'error': 'no such a user'})
+            return JsonResponse({'state': 'empty'})
         # 密码不匹配
-        if check_password(password, models.User.objects.get(username=username).password):
-            return JsonResponse({'error': 'password is wrong'})
+        if not check_password(password, models.User.objects.get(username=username).password):
+            return JsonResponse({'state': 'not matched'})
         # 当前已经处于登录状态
         if 'is_login' in request.session and request.session['is_login']:
-            return JsonResponse({'error': 'has logged in'})
+            return JsonResponse({'state': 'already online'})
 
         request.session['username'] = username
         request.session['is_login'] = True
-        return JsonResponse({'user': username})
+        return JsonResponse({'state': 1})
 
 
 # 1.3.4: for all users: logout
@@ -32,14 +34,13 @@ def logout(request):
             username = request.session['username']
             del request.session['is_login']
             del request.session['username']
-            return JsonResponse({'user': username})
+            return JsonResponse({'state': 1})   # success
         else:                   # session_id不存在或被注销
-            return JsonResponse({'error': 'no valid session'})
+            return JsonResponse({'state': 0})   # fail
 
 
 # 1.1.1: for admin: to get users under various filters
 def get_user(request):
-    # TODO: add identity verification
     if request.method == 'GET':
         admin = models.User.objects.get(username=request.session['username'])
         if admin.identity != 'admin':
@@ -51,13 +52,6 @@ def get_user(request):
         user_list = models.User.objects.filter(username__contains=username)
         total = len(user_list)
 
-        page = int(request.GET.get('page')) if request.GET.get('page') != None else 1
-        size = int(request.GET.get('size')) if request.GET.get('size') != None else 10
-        if (page - 1) * size > total:
-            return JsonResponse({'error': 'page overflow'})
-        first = (page - 1) * size
-        last = max(page * size, total)
-        user_list = user_list[first: last]
         u_list = []
         for user in user_list:
             u = {}
@@ -108,6 +102,7 @@ def set_user(request):
         userid = int(userid)
         user = models.User.objects.get(id=userid)
         user.identity = identity
+        user.save()
         return JsonResponse({'ok': 'set'})
 
 
@@ -118,10 +113,8 @@ def get_device(request):
         if admin.identity != 'admin':
             return JsonResponse({'error': 'low permission'})
 
-        page = int(request.GET.get('page')) if request.GET.get('page') != None else 1
-        size = int(request.GET.get('size')) if request.GET.get('size') != None else 10
         valid = request.GET.get('valid') if request.GET.get('valid') != None else 'none'
-        device_name = request.GET.get('divicename')
+        device_name = request.GET.get('devicename')
 
         if device_name == None:
             device_list = models.Device.objects.all()
@@ -131,18 +124,6 @@ def get_device(request):
             device_list = device_list.filter(valid=valid)
 
         total = len(device_list)
-        if (page - 1) * size > total:
-            return JsonResponse({'error': 'page overflow'})
-
-        if not size or size < 0:
-            return JsonResponse({'error': 'empty data for undefined or negative size'})
-        if size == 0:
-            size = total
-        if not page or page <= 0 or (page - 1) * size > total:
-            return JsonResponse({'error': 'empty data for undefined or illegal page'})
-        first = (page - 1) * size
-        last = max(page * size, total)
-        device_list = device_list[first: last]
         d_list = []
         for device in device_list:
             d = {}
@@ -177,7 +158,7 @@ def edit_device(request):
 
         device = models.Device.objects.get(id=device_id)
         d = {}
-        d['devicename'] = request.POST.get('devicename')
+        d['device_name'] = request.POST.get('devicename')
         d['owner'] = request.POST.get('owner')
         d['phone'] = request.POST.get('phone')
         d['user'] = request.POST.get('user')
@@ -187,9 +168,10 @@ def edit_device(request):
         d['addition'] = request.POST.get('addition')
         d['valid'] = request.POST.get('valid')
         d['reason'] = request.POST.get('reason')
-        for key, value in d:
+        for key, value in d.items():
             if value != None:
-                device[key] = value
+                setattr(device, key, value)
+        device.save()
         return JsonResponse({'ok': 'edited'})
 
 
@@ -200,7 +182,7 @@ def delete_device(request):
         if device_id == None:
             return JsonResponse({'error': 'deviceid missing'})
         device_id = int(device_id)
-        if not models.Device.objects.filter(device_id).exists():
+        if not models.Device.objects.filter(id=device_id).exists():
             return JsonResponse({'error': 'deviceid invalid'})
 
         models.Device.objects.get(id=device_id).delete()
@@ -213,8 +195,6 @@ def delete_device(request):
 # 2.2.0: for normal users: to get devices on shelf
 def get_shelf_device(request):
     if request.method == 'GET':
-        page = int(request.GET.get('page')) if request.GET.get('page') != None else 1
-        size = int(request.GET.get('size')) if request.GET.get('size') != None else 10
         device_name = request.GET.get('divicename')
 
         if device_name == None:
@@ -222,10 +202,7 @@ def get_shelf_device(request):
         else:
             device_list = models.Device.objects.filter(device_name=device_name)
         device_list = device_list.filter(valid__in=['on_shelf', 'renting'])
-
         total = len(device_list)
-        if (page - 1) * size > total:
-            return JsonResponse({'error': 'page overflow'})
 
         d_list = []
         for device in device_list:
@@ -243,15 +220,6 @@ def get_shelf_device(request):
             d['reason'] = device.reason
             d_list.append(d)
 
-        if not size or size < 0:
-            return JsonResponse({'error': 'empty data for undefined or negative size'})
-        if size == 0:
-            size = total
-        if not page or page <= 0 or (page - 1) * size > total:
-            return JsonResponse({'error': 'empty data for undefined or illegal page'})
-        first = (page - 1) * size
-        last = max(page * size, total)
-        d_list = d_list[first: last]
         return JsonResponse({
             'total': total,
             'devicelist': d_list,
@@ -267,6 +235,24 @@ def order_device(request):
         due = request.POST.get('due')
         if device_id == None or reason == None or start == None or due == None:
             return JsonResponse({'error': 'parameters missing'})
+        start_list = start.split('-')
+        due_list = due.split('-')
+        start_time = date(year=int(start_list[0]), month=int(start_list[1]), day=int(start_list[2]))
+        due_time = date(year=int(due_list[0]), month=int(due_list[1]), day=int(start_list[2]))
+        # to prevent illegal renting order resulting from duration collision
+        now = timezone.now().date()
+        for order in models.RentingOrder.objects.filter(device_id=device_id):
+            if (order.start - now).year > 0:        # for the reserved devices doesn't start yet
+                if order.start <= start_time <= order.due or start_time <= order.start <= due_time:
+                    o = {}
+                    o['start'] = order.start
+                    o['due'] = order.due
+                    o['username'] = order.username
+                    o['contact'] = order.contact
+                    return JsonResponse({
+                        'error': 'illegal application for duration collision',
+                        'order': order
+                    })
         device_id = int(device_id)
         username = request.session['username']
         contact = models.User.objects.get(username=username).contact
@@ -278,6 +264,7 @@ def order_device(request):
             start=start,
             due=due,
             valid='waiting',
+            rent_state='default'
         )
         return JsonResponse({'ok': 'waiting for offer to agree the order'})
 
@@ -285,17 +272,9 @@ def order_device(request):
 # 2.4.0: for normal users: to get his or her renting order history
 def get_order_history(request):
     if request.method == 'GET':
-        page = int(request.GET.get('page')) if request.GET.get('page') != None else 1
-        size = int(request.GET.get('size')) if request.GET.get('size') != None else 10
         username = request.session['username']
         order_list = models.RentingOrder.objects.filter(user=username)
         total = len(order_list)
-        if (page - 1) * size > total:
-            return JsonResponse({'error': 'page overflow'})
-
-        first = (page - 1) * size
-        last = max(page * size, total)
-        order_list = order_list[first:last]
         o_list = []
         for order in order_list:
             device = models.Device.objects.get(id=order.device_id)
@@ -318,15 +297,10 @@ def get_order_history(request):
 # 2.5.0:for normal users: to get devices he or she has already rented
 def get_self_rented_device(request):
     if request.method == 'GET':
-        page = int(request.GET.get('page')) if request.GET.get('page') != None else 1
-        size = int(request.GET.get('size')) if request.GET.get('size') != None else 10
         username = request.session['username']
         device_list = models.Device.objects.filter(user=username)
 
         total = len(device_list)
-        if (page - 1) * size > total:
-            return JsonResponse({'error': 'page overflow'})
-
         d_list = []
         for device in device_list:
             d = {}

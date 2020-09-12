@@ -18,10 +18,10 @@ class Device(models.Model):
     device_name = models.CharField(max_length=64, default=None)
     owner = models.CharField(max_length=64, default=None)
     owner_phone = models.CharField(max_length=64, default=None)
-    user = models.CharField(max_length=64, default=None)
+    # user = models.CharField(max_length=64, default=None)
     # rent_out = models.CharField(default=False)
-    start = models.DateTimeField(default=datetime.datetime.now())    # TODO
-    due = models.DateTimeField(default=datetime.datetime.now())
+    # start = models.DateField(default=datetime.datetime.now())    # TODO
+    # due = models.DateField(default=datetime.datetime.now())
     location = models.CharField(max_length=64, default=None)
     addition = models.CharField(max_length=64, default=None)
     valid = models.CharField(max_length=64, default=None)
@@ -34,12 +34,12 @@ class RentingOrder(models.Model):
     username = models.CharField(max_length=64, default=None)
     reason = models.TextField(max_length=2000, default=None)
     contact = models.TextField(max_length=64, default=None)
-    start = models.DateTimeField(max_length=64, default=None)
-    due = models.DateTimeField(max_length=64, default=None)
+    start = models.DateField(max_length=64, default=None)
+    due = models.DateField(max_length=64, default=None)
     valid = models.CharField(max_length=64, default=None)
     rent_state = models.CharField(max_length=64, default='0')
-    rent_start = models.DateTimeField(max_length=64, default=None)
-    rent_end = models.DateTimeField(max_length=64, default=None)
+    rent_start = models.DateField(max_length=64, default=None)
+    rent_end = models.DateField(max_length=64, default=None)
 
 
 class ShelfOrder(models.Model):
@@ -47,12 +47,12 @@ class ShelfOrder(models.Model):
     owner_name = models.CharField(max_length=64, default=None)
     reason = models.TextField(max_length=2000, default=None)
     state = models.CharField(max_length=64, default=None)
-    start_time = models.DateTimeField(max_length=64, default=None)
+    start_time = models.DateField(max_length=64, default=None)
 
 
 class ApplyOrder(models.Model):
-    user_id=models.CharField(max_length=64, default=None)
-    reason=models.TextField(max_length=2000, default=None)
-    state=models.CharField(max_length=64, default=None)
+    user_id = models.CharField(max_length=64, default=None)
+    reason = models.TextField(max_length=2000, default=None)
+    state = models.CharField(max_length=64, default=None)
     #failed passed waiting 默认waiting、
 
