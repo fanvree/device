@@ -57,6 +57,7 @@ def send_email(request):
 
 # 完成注册
 def logon(request):
+    # print(request.POST)
     if ('username' in request.POST) and ('email' in request.POST) and ('code' in request.POST) and ('password' in request.POST):
         username = request.POST['username']
         if not (User.objects.filter(username=username).exists()):
@@ -73,7 +74,7 @@ def logon(request):
                 user.apply = "False"
                 user.token = ""
                 user.save()
-                return JsonResponse({"state": "注册成功"})
+                return JsonResponse({"state": 1})
             else:
                 return JsonResponse({"state": "注册失败code is error"})
         return JsonResponse({"state": "注册失败username is exist"})
@@ -95,7 +96,7 @@ def owner_mine(request):
     if 'valid' in request.GET:
         valid = request.GET['valid']
     if 'devicename' in request.GET:
-        device_name = int(request.GET['devicename'])
+        device_name = request.GET['devicename']
     show_list = Device.objects.all()
     total = 0
     ret_list = []
@@ -144,7 +145,7 @@ def owner_device_add(request):
         shelf_order.state = 'waiting'
         shelf_order.start_time = timezone.now().date()
         shelf_order.save()
-        return JsonResponse({'message': 'ok'})
+        return JsonResponse({'state': 1})
 
 
 # 改变我的设备状态：
@@ -192,7 +193,7 @@ def owner_order_list(request):
                 owner = device.owner
                 device_name = device.device_name
                 location = device.location
-                if owner == request.session['username'] and \
+                if (True or  owner == request.session['username']) and \
                         (device_id == -1 or device_id == renting_order.device_id) and \
                         (valid == 'none' or valid == renting_order.valid) and \
                         (rent_state == 'none' or rent_state == renting_order.rent_state):
@@ -262,6 +263,9 @@ def owner_device_order_change(request):
 
 
 def my(request):
+    print(request.session)
+    if not ('username' in request.session):
+        return JsonResponse({'state': 0})
     username = request.session['username']
     user = User.objects.get(username=username)
     userid = user.id

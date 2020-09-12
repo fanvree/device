@@ -14,7 +14,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from fzr.views import send_email
+from fzr.views import send_email, my
 from fzr.views import logon
 from fzr.views import owner_mine
 from fzr.views import owner_device_add
@@ -73,4 +73,5 @@ urlpatterns = [
     url(r'^user/device/own$', get_self_rented_device),
     url(r'^user/apply$', apply_to_be_offer),
     url(r'^user/device/reserved$', get_device_reserved_info),
+    url(r'^my$', my),
 ]

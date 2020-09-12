@@ -1,3 +1,4 @@
+import json
 class SimpleMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
@@ -7,7 +8,8 @@ class SimpleMiddleware:
         # Code to be executed for each request before
         # the view (and later middleware) are called.
 
-
+        if request.method == "POST" and "json" in request.headers["Content-Type"]:
+            request.POST = json.loads(request.body)
         response = self.get_response(request)
 
         response["Access-Control-Allow-Origin"] = " * "

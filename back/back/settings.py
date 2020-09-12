@@ -167,3 +167,6 @@ CORS_ALLOW_HEADERS = (
     'x-csrftoken',
     'x-requested-with',
 )
+
+SESSION_COOKIE_SAMESITE = None
+# CSRF_COOKIE_SAMESITE = None

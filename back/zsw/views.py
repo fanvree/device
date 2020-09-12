@@ -4,6 +4,7 @@ from django.http import HttpResponse
 from django.contrib.auth.hashers import make_password, check_password
 from django.utils import timezone
 from database import models
+from datetime import date
 
 
 # Create your views here.
@@ -19,12 +20,13 @@ def login(request):
         if not check_password(password, models.User.objects.get(username=username).password):
             return JsonResponse({'state': 'not matched'})
         # 当前已经处于登录状态
-        if 'is_login' in request.session and request.session['is_login']:
-            return JsonResponse({'state': 'already online'})
+        # if 'is_login' in request.session and request.session['is_login']:
+        #     return JsonResponse({'state': 'already online'})
 
         request.session['username'] = username
         request.session['is_login'] = True
-        return JsonResponse({'state': 1})
+        return JsonResponse({'state': 1,'identity': models.User.objects.get(username=username).identity})
+    return JsonResponse({'state': 0,'identity': 'none'})
 
 
 # 1.3.4: for all users: logout
@@ -42,15 +44,17 @@ def logout(request):
 # 1.1.1: for admin: to get users under various filters
 def get_user(request):
     if request.method == 'GET':
-        # print('username' in request.session)
-        # admin = models.User.objects.get(username=request.session['username'])
-        # if admin.identity != 'admin':
-        #     return JsonResponse({'error': 'low permission'})
+        print('username' in request.session)
+        admin = models.User.objects.get(username=request.session['username'])
+        if admin.identity != 'admin':
+            return JsonResponse({'error': 'low permission'})
 
         username = request.GET.get('username')
+
         if not username:
-            return JsonResponse({'error': 'empty data for undefined or illegal username'})
-        user_list = models.User.objects.filter(username__contains=username)
+            user_list = models.User.objects.all()
+        else:
+            user_list = models.User.objects.filter(username__contains=username)
         total = len(user_list)
 
         u_list = []
@@ -111,11 +115,12 @@ def set_user(request):
             return JsonResponse({'error': 'userid missing'})
         if not models.User.objects.filter(id=userid).exists():
             return JsonResponse({'error': 'user non-existence'})
-        if identity == None or identity not in ('normal', 'owner', 'admin'):
+        if identity == None or identity not in ('normal', 'renter', 'owner', 'admin'):
             return JsonResponse({'error': 'identity invalid'})
         userid = int(userid)
         user = models.User.objects.get(id=userid)
         user.identity = identity
+        print(userid,identity)
         user.save()
         return JsonResponse({'ok': 'set'})
 
@@ -124,19 +129,22 @@ def set_user(request):
 def get_device(request):
     if request.method == 'GET':
         admin = models.User.objects.get(username=request.session['username'])
-        if admin.identity != 'admin':
-            return JsonResponse({'error': 'low permission'})
 
+        if admin.identity == 'normal':
+            return JsonResponse({'error': 'low permission'})
         valid = request.GET.get('valid') if request.GET.get('valid') != None else 'none'
         device_name = request.GET.get('devicename')
-
-        if device_name == None:
+        print(device_name)
+        print(valid)
+        if device_name == None or device_name == '':
+            print(device_name, valid)
             device_list = models.Device.objects.all()
         else:
             device_list = models.Device.objects.filter(device_name=device_name)
-        if valid != 'none':
+        if valid is not None and valid != '':
             device_list = device_list.filter(valid=valid)
-
+        if admin.identity == 'renter':
+            device_list = device_list.filter(owner=admin.username)
         total = len(device_list)
         d_list = []
         for device in device_list:
@@ -179,6 +187,7 @@ def edit_device(request):
         for key, value in d.items():
             if value != None:
                 setattr(device, key, value)
+        print(device)
         device.save()
         return JsonResponse({'ok': 'edited'})
 
@@ -188,6 +197,7 @@ def edit_device(request):
 def delete_device(request):
     if request.method == 'POST':
         device_id = request.POST.get('deviceid')
+        print(device_id)
         if device_id == None:
             return JsonResponse({'error': 'deviceid missing'})
         device_id = int(device_id)
@@ -197,7 +207,7 @@ def delete_device(request):
         if device.valid == 'renting':
             return JsonResponse({'error': 'device is rented'})
         models.Device.objects.get(id=device_id).delete()
-        return JsonResponse({'ok': 'deleted'})
+        return JsonResponse({'message': 'ok'})
 
 
 # 2.1.0: for normal users: to login or logout, see 1.3.3 & 1.3.4
@@ -264,6 +274,7 @@ def order_device(request):
                     'order': o
                 })
         device_id = int(device_id)
+        print(request.session)
         username = request.session['username']
         contact = models.User.objects.get(username=username).contact
         print(start)
@@ -283,6 +294,7 @@ def order_device(request):
             rent_end=start_time,
         )
         return JsonResponse({'ok': 'waiting for offer to agree the order'})
+    return JsonResponse({'ok': 'waiting for offer to agree the order'})
 
 
 # 2.4.0: for normal users: to get his or her renting order history
@@ -363,11 +375,14 @@ def apply_to_be_offer(request):
 
 # 2.7.0:for normal users: to get reserved information of one device
 def get_device_reserved_info(request):
+    print("000")
     if request.method == 'GET':
         device_id = request.GET.get('deviceid')
+        print(device_id)
         device = models.Device.objects.get(id=device_id)
-        username = request.session['username']
+        # username = request.session['username']
         d = {}
+        print("111")
         d['deviceid'] = device.id
         d['devicename'] = device.device_name
         d['owner'] = device.owner
@@ -377,6 +392,7 @@ def get_device_reserved_info(request):
         d['valid'] = device.valid
         d['reason'] = device.reason
         d['orderlist'] = []
+        print("222")
 
         for order in models.RentingOrder.objects.all():
             o = {}
@@ -385,6 +401,7 @@ def get_device_reserved_info(request):
             o['due'] = order.due
             o['contact'] = order.contact
             d['orderlist'].append(o)
+        print("333")
         return JsonResponse(d)
 
 

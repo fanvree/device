@@ -7,11 +7,11 @@ from database import models
 
 def GetOrderList(request): #获得用户租借申请的列表
     if request.method == 'GET':
-        #page = request.GET.get('page')
-        #size = request.GET.get('size')
+        # page = request.GET.get('page')
+        # size = request.GET.get('size')
         valid = request.GET.get('valid')
         answer_list = []  #最终返回的列表
-        #order_list，根据valid信息取出来RentingOrder列表
+        # order_list，根据valid信息取出来RentingOrder列表
         if valid == 'passed':
             order_list = models.RentingOrder.objects.filter(valid='passed')
         elif valid == 'failed':
@@ -23,6 +23,8 @@ def GetOrderList(request): #获得用户租借申请的列表
 
         #根据页数和个数得到相应的RentingOrder，再转成字典、压入列表
         for order in order_list:
+            if not models.Device.objects.filter(id=order.device_id).exists():
+                continue
             device=models.Device.objects.get(id=order.device_id)
             part_answer={}#记录此返回消息的字典
             part_answer['orderid']=order.id
@@ -32,8 +34,9 @@ def GetOrderList(request): #获得用户租借申请的列表
             part_answer['start'] = order.start
             part_answer['due']=order.due
             part_answer['location']=device.location
-            part_answer['addition']=device.addition
-            part_answer['state']=device.valid
+            # part_answer['addition']=device.addition
+            part_answer['addition']=order.reason
+            part_answer['valid']=order.valid
 
             answer_list.append(part_answer)
         total = len(answer_list)
@@ -44,11 +47,11 @@ def GetOrderList(request): #获得用户租借申请的列表
 def ChangeOrderState(request): #改变RentingOrder的状态
     if request.method=='GET':
         orderid=request.GET.get('orderid')
-        state=request.GET.get('state')
+        state=int(request.GET.get('state'))
 
         order=models.RentingOrder.objects.get(id=orderid)
         device=models.Device.objects.get(id=order.device_id)
-
+        print(orderid,' ',state)
         if state==0:#改变device的valid和user
             order.valid='passed'
             device.valid='renting'
@@ -57,7 +60,9 @@ def ChangeOrderState(request): #改变RentingOrder的状态
             order.valid='waiting'
         elif state==2:
             order.valid='failed'
-
+        print(orderid, ' ',order.valid)
+        order.save()
+        device.save()
         return JsonResponse({'message':'ok'})
     else:
         return JsonResponse({'error': 'require GET'})
@@ -68,6 +73,7 @@ def DeleteOrder(request):#删除RentingOrder。所做的操作只是删除
         order=models.RentingOrder.objects.get(id=orderid)
         if order:
             order.delete()
+            return JsonResponse({'message':'ok'})
         else:
             return JsonResponse({'error':'order does not exist'})
     else:
@@ -103,6 +109,7 @@ def ChangeOfferState(request):#改变用户申请成为设备提供者的状态�
     if request.method=='GET':
         offerid=request.GET.get('offerid')
         state=request.GET.get('state')
+        print(offerid,state)
         offer=models.ApplyOrder.objects.get(id=offerid)
         user=models.User.objects.get(id=offer.user_id)
         if state==0:#改变user的identitiy
@@ -124,7 +131,7 @@ def DeleteOffer(request):#删除用户成为设备提供者的申请
         offerid=request.POST.get('offerid')
         offer=models.ApplyOrder.get(id=offerid)
         offer.delete()
-        return JsonResponse({})
+        return JsonResponse({"message": "ok"})
     else:
         return JsonResponse({'error': 'require POST'})
 
