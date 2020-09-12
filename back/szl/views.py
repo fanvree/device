@@ -46,7 +46,7 @@ def GetOrderList(request): #获得用户租借申请的列表
 
 
 def conflict(start_time, due_time, device_id):
-    for order in models.RentingOrder.objects.filter(device_id=device_id, valid='passed'):
+    for order in models.RentingOrder.objects.filter(device_id=int(device_id), valid='passed'):
         if not (order.due < start_time or due_time < order.start):
             o = {}
             o['start'] = str(order.start.year) + '-' + str(order.start.month) + '-' + str(order.start.day)
@@ -69,7 +69,7 @@ def ChangeOrderState(request): #改变RentingOrder的状态
         device=models.Device.objects.get(id=order.device_id)
         print(orderid,' ',state)
         if state==0:#改变device的valid和user
-            if conflict(order.start, order.due, device) != False:
+            if conflict(order.start, order.due, device.id) != False:
                 return conflict(order.start, order.due, device)
             order.valid='passed'
             device.valid='renting'
@@ -114,11 +114,15 @@ def GetOfferList(request):#查看设备提供者申请列表
         for offer in offer_list:
             part_answer={}
             part_answer['offerid']=offer.id
-            user=models.User.objects.get(id=offer.user_id)
-            part_answer['applicant']=user.username
+            if models.User.objects.filter(id=offer.user_id).exists():
+                part_answer['applicant'] = models.User.objects.get(id=offer.user_id).username
+            else:
+                part_answer['applicant'] = '用户' + str(offer.user_id) + '已经删除'
             part_answer['reason']=offer.reason
             answer_list.append(part_answer)
         total=len(answer_list)
+        # print(total)
+        # print(answer_list)
         return JsonResponse({'total':total,'offerlist':answer_list})
     else:
         return JsonResponse({'error': 'require GET'})
@@ -147,7 +151,7 @@ def ChangeOfferState(request):#改变用户申请成为设备提供者的状态�
 def DeleteOffer(request):#删除用户成为设备提供者的申请
     if request.method=='POST':
         offerid=request.POST.get('offerid')
-        offer=models.ApplyOrder.get(id=offerid)
+        offer=models.ApplyOrder.objects.get(id=offerid)
         offer.delete()
         return JsonResponse({"message": "ok"})
     else:
