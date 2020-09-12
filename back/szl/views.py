@@ -156,7 +156,7 @@ def ChangeOfferState(request):#改变用户申请成为设备提供者的状态�
 def DeleteOffer(request):#删除用户成为设备提供者的申请
     if request.method=='POST':
         offerid=request.POST.get('offerid')
-        offer=models.ApplyOrder.objects.get(id=offerid)
+        offer=models.ApplyOrder.objects.filter(id=offerid)
         offer.delete()
         return JsonResponse({"message": "ok"})
     else:
@@ -182,8 +182,10 @@ def GetShelfList(request):#得到设备上架请求列表
             part_answer={}
             part_answer['shelfid']=shelf.id
             part_answer['ownername']=shelf.owner_name
-
-            device=models.Device.objects.get(id=shelf.device_id)
+            if models.Device.objects.filter(id=shelf.device_id).exists():
+                device=models.Device.objects.get(id=shelf.device_id)
+            else:
+                continue
             part_answer['devicename']=device.device_name
             part_answer['location']=device.location
             part_answer['addition']=device.addition
@@ -235,5 +237,40 @@ def DeleteShelf(request):#删除上架申请
         return JsonResponse({'error':'require POST'})
 
 
+def Statistics(request):
+    labels='下架','在架','借出','等待审批'
+    num_off_shelf=0
+    num_on_shelf=0
+    num_renting=0
+    num_on_order=0
+    Devices=models.Device.objects.all()
+    for device in Devices:
+        valid=device.valid
+        if valid=='off_shelf':
+            num_off_shelf=num_off_shelf+1
+        elif valid=='on_shelf':
+            num_on_shelf=num_on_shelf+1
+        elif valid=='renting':
+            num_renting=num_renting+1
+        elif valid=='on_order':
+            num_on_order=num_on_order+1
+        else:
+            pass
+    num_sum=num_on_order+num_renting+num_on_shelf+num_off_shelf
+    sizes=[num_off_shelf*100/num_sum,num_on_shelf*100/num_sum,num_renting*100/num_sum,num_on_order*100/num_sum]
+    #sizes=[25,25,25,25]
+    explode=(0,0,0,0.1)
+    fig1,ax1=plt.subplots()
+    ax1.pie(sizes,explode=explode,labels=labels,
+            autopct='%1.1f%%',shadow=True,startangle=90)
+    ax1.axis('equal')
 
+    plt.show()
+    canvas=fig1.canvas
 
+    buffer=io.BytesIO()
+    canvas.print_png(buffer)
+    data=buffer.getvalue()
+    buffer.close()
+
+    return render({'pie':data})
