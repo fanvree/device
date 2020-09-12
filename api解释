@@ -686,10 +686,11 @@ Request:
 }
 Response:
 {
+	'total': total,
 	'comment_list':[
 		{
 			'username_from': 'yxr18',
-			'comment': '你笑起来真好看',
+			'content': '你笑起来真好看',
 			'time':'xxxx-xx-xx xx:xx:xx'
 		}
 	]
