@@ -118,7 +118,7 @@ def owner_mine(request):
                     'valid': device.valid,
                     'reason': device.reason,
                 })
-    return JsonResponse(ret_list)
+    return JsonResponse({'devicelist': ret_list, 'total': total})
 
 
 # 增加我的设备
@@ -149,7 +149,25 @@ def owner_device_add(request):
 
 
 def owner_device_waiting(request):
+    if request.method == "GET":
+        device_id = request.GET['deviceid']
+        reason = request.GET['reason']
+        if Device.objects.filter(id=device_id).exists():
+            device = Device.objects.get(id=device_id)
+            device.valid = 'waiting'
+            device.reason = reason
 
+            shelf_order = ShelfOrder()
+            shelf_order.device_id = device.id
+            shelf_order.owner_name = device.owner
+            shelf_order.reason = device.reason
+            shelf_order.state = 'waiting'
+            device.save()
+            shelf_order.save()
+            JsonResponse({"message": "ok"})
+
+        else:
+            JsonResponse({"error":"no device"})
     pass
 
 

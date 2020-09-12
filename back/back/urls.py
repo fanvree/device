@@ -21,6 +21,7 @@ from fzr.views import owner_device_add
 from fzr.views import owner_device_change
 from fzr.views import owner_order_list
 from fzr.views import owner_device_order_change
+from fzr.views import owner_device_waiting
 from django.conf.urls import url
 from szl import views
 from zsw.views import login
@@ -58,6 +59,7 @@ urlpatterns = [
     url(r'^owner/device/add$', owner_device_add),
     url(r'^owner/device/change$', owner_device_change),
     url(r'^owner/device/order$', owner_order_list),
+    url(r'^owner/device/waiting$', owner_device_waiting),
     url(r'^owner/device/order/change$', owner_device_order_change),
     url(r'^login$', login),
     url(r'^logout$', logout),
