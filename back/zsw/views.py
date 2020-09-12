@@ -4,7 +4,7 @@ from django.http import HttpResponse
 from django.contrib.auth.hashers import make_password, check_password
 from django.utils import timezone
 from database import models
-from datetime import date
+from datetime import date, datetime
 
 
 # Create your views here.
@@ -490,3 +490,47 @@ def get_shelf_message(request):
             'total': total,
             'message_list': message_list
         })
+
+
+# for all users: send comments to others
+def send_comment(request):
+    if request.method == 'POST':
+        userid_from = request.POST.get('userid_from')
+        userid_to = request.POST.get('userid_to')
+        content = request.POST.get('content')
+        if not userid_from or not userid_to or not content:
+            return JsonResponse({'error': 'invalid parameters'})
+        if not models.User.objects.filter(id=userid_from).exists() or not models.User.objects.filter(id=userid_to).exists():
+            return JsonResponse({'error': 'user non-existence or deleted'})
+        username_from = models.User.objects.get(id=userid_from).username
+        username_to = models.User.objects.get(id=userid_to).username
+        time = datetime.now()
+        models.Comment.objects.create(
+            username_from=username_from,
+            username_to=username_to,
+            content=content,
+            time=time
+        )
+        return JsonResponse({'state': 1})
+
+
+# for all users: receive comments from others
+def receive_comment(request):
+    # .strftime('%y-%m-%b %H:%M:%S')
+    if request.method == 'GET':
+        username_to = request.session['username']
+        comment_list = []
+        for comment in models.Comment.objects.filter(username_to=username_to):
+            if models.User.objects.filter(username=username_to):
+                continue
+            c = {}
+            c['username_from'] = comment.username_from
+            c['content'] = comment.content
+            c['time'] = comment.strftime('%y-%m-%b %H:%M:%S')
+            comment_list.append(c)
+        total = len(comment_list)
+        return JsonResponse({
+            'total': total,
+            'comment_list': comment_list
+        })
+

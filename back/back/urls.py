@@ -29,6 +29,8 @@ from zsw.views import get_device_reserved_info
 from zsw.views import get_application_message
 from zsw.views import get_renting_message
 from zsw.views import get_shelf_message
+from zsw.views import send_comment
+from zsw.views import receive_comment
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -69,6 +71,8 @@ urlpatterns = [
     url(r'^message/apply$', get_application_message),
     url(r'^message/rent$', get_renting_message),
     url(r'^message/shelf$', get_shelf_message),
+    url(r'^comment/send$', send_comment),
+    url(r'^comment/receive$', receive_comment),
     url(r'^my$', my),
-    url(r'/boss/static$',views.Statistics)
+    url(r'/boss/static$', views.Statistics)
 ]
