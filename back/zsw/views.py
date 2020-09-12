@@ -98,6 +98,14 @@ def delete_user(request):
         username = models.User.objects.get(id=userid)
         if models.RentingOrder.objects.filter(username=username, rent_state='renting').exists():
             return JsonResponse({'error': 'the user is using a device'})
+
+        # delete all application, renting and shelf orders of this user
+        for order in models.ApplyOrder.objects.filter(user_id=userid):
+            models.ApplyOrder.objects.get(id=order.id).delete()
+        for order in models.RentingOrder.objects.filter(username=username):
+            models.RentingOrder.objects.get(id=order.id).delete()
+        for order in models.ShelfOrder.objects.filter(owner_name=username):
+            models.ShelfOrder.objects.get(id=order.id).delete()
         models.User.objects.get(id=userid).delete()
         return JsonResponse({'ok': 'deleted'})
 
@@ -206,6 +214,12 @@ def delete_device(request):
         device = models.Device.objects.get(id=device_id)
         if device.valid == 'renting':
             return JsonResponse({'error': 'device is rented'})
+
+        # delete all the renting orders and shelf orders related to this device
+        for order in models.RentingOrder.objects.filter(device_id=device_id):
+            models.RentingOrder.objects.get(id=order.id).delete()
+        for order in models.ShelfOrder.objects.filter(device_id=device_id):
+            models.ShelfOrder.objects.get(id=order.id).delete()
         models.Device.objects.get(id=device_id).delete()
         return JsonResponse({'message': 'ok'})
 
