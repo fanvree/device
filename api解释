@@ -495,8 +495,19 @@ Response:
 }
 
 
-2.3删除设备：（valid=delete）
 2.4上架设备：（）
+Method:GET
+URL：/owner/device/waiting
+QueryParam:
+{
+	'deviceid': '101',
+	'reason':
+}
+Response:
+{
+}
+
+2.3删除设备：（valid=delete）
 2.5下架设备：（）
 # 改变我的设备状态valid：on_shelf on_order off_shelf renting   delete(删除设备)
 Method:GET
