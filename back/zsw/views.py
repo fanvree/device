@@ -378,7 +378,7 @@ def apply_to_be_offer(request):
 def get_device_reserved_info(request):
     if request.method == 'GET':
         device_id = request.GET.get('deviceid')
-        print(device_id)
+        print('hahaha',device_id)
         device = models.Device.objects.get(id=device_id)
         # username = request.session['username']
         d = {}
