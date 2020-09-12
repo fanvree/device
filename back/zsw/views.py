@@ -316,6 +316,7 @@ def get_order_history(request):
             o['location'] = device.location
             o['addition'] = device.addition
             o['state'] = order.valid
+            o_list.append(o)
         return JsonResponse({
             'total': total,
             'orderlist': o_list,
@@ -361,14 +362,12 @@ def apply_to_be_offer(request):
 
 # 2.7.0:for normal users: to get reserved information of one device
 def get_device_reserved_info(request):
-    print("000")
     if request.method == 'GET':
         device_id = request.GET.get('deviceid')
         print(device_id)
         device = models.Device.objects.get(id=device_id)
         # username = request.session['username']
         d = {}
-        print("111")
         d['deviceid'] = device.id
         d['devicename'] = device.device_name
         d['owner'] = device.owner
@@ -378,7 +377,6 @@ def get_device_reserved_info(request):
         d['valid'] = device.valid
         d['reason'] = device.reason
         d['orderlist'] = []
-        print("222")
 
         for order in models.RentingOrder.objects.all():
             o = {}
@@ -387,7 +385,6 @@ def get_device_reserved_info(request):
             o['due'] = str(order.due.year) + '-' + str(order.due.month) + '-' + str(order.due.day)
             o['contact'] = order.contact
             d['orderlist'].append(o)
-        print("333")
         return JsonResponse(d)
 
 
@@ -409,3 +406,45 @@ def get_single_device_info(request):
         d['valid'] = device.valid
         d['reason'] = device.reason
         return JsonResponse(d)
+
+
+# get received messages of users(results of apply orders and renting orders)
+def get_user_message(request):
+    if request.method == 'GET':
+        username = request.session['username']
+        user = models.User.objects.get(username=username)
+        message_list = []
+        for order in models.ApplyOrder.objects.filter(user_id=user.id):
+            message = {}
+            message['type'] = 'ApplyOrder'
+            message['state'] = order.state
+            message['reason'] = order.reason
+            message['devicename'] = ''
+            message['deviceid'] = 0
+            message_list.append(message)
+        for order in models.RentingOrder.objects.filter(username=username):
+            message = {}
+            message['type'] = 'RentingOrder'
+            message['state'] = order.valid
+            message['reason'] = order.reason
+            message['deviceid'] = order.device_id
+            device = models.RentingOrder.objects.get(id=order.device_id)
+            message['devicename'] = device.device_name
+            message_list.append(message)
+        return JsonResponse({'message_list': message_list})
+
+
+# get received message of owners(results of shelf orders)
+def get_owner_message(request):
+    if request.method == 'GET':
+        username = request.session['username']
+        # user = models.User.objects.get(username=username)
+        message_list = []
+        for order in models.ShelfOrder.objects.filter(owner_name=username):
+            message = {}
+            message['state'] = order.state
+            message['reason'] = order.reason
+            message['deviceid'] = order.device_id
+            device = models.Device.objects.get(id=order.device_id)
+            message['devicename'] = device.device_name
+            message_list.append(message)
