@@ -2,10 +2,12 @@ from django.shortcuts import render
 
 # Create your views here.
 
-from django.http import JsonResponse
+from django.http import JsonResponse, StreamingHttpResponse, HttpResponse
 from database import models
 import matplotlib.pyplot as plt
 import io
+import base64
+
 
 def GetOrderList(request): #获得用户租借申请的列表
     if request.method == 'GET':
@@ -240,7 +242,7 @@ def DeleteShelf(request):#删除上架申请
 
 
 def Statistics(request):
-    labels='下架','在架','借出','等待审批'
+    labels='off shelf' ,'on shelf','renting','waiting approve'
     num_off_shelf=0
     num_on_shelf=0
     num_renting=0
@@ -267,12 +269,13 @@ def Statistics(request):
             autopct='%1.1f%%',shadow=True,startangle=90)
     ax1.axis('equal')
 
-    plt.show()
+    # plt.show()
     canvas=fig1.canvas
-
+    print(canvas)
     buffer=io.BytesIO()
     canvas.print_png(buffer)
     data=buffer.getvalue()
     buffer.close()
-
-    return render({'pie':data})
+    resp = HttpResponse(data)
+    resp["Content-Type"] = "image/jpeg"
+    return resp
