@@ -118,7 +118,7 @@ def owner_mine(request):
                     'valid': device.valid,
                     'reason': device.reason,
                 })
-    return JsonResponse(ret_list)
+    return JsonResponse({'devicelist': ret_list, 'total': total})
 
 
 # 增加我的设备
@@ -146,6 +146,29 @@ def owner_device_add(request):
         shelf_order.start_time = timezone.now().date()
         shelf_order.save()
         return JsonResponse({'state': 1})
+
+
+def owner_device_waiting(request):
+    if request.method == "GET":
+        device_id = request.GET['deviceid']
+        reason = request.GET['reason']
+        if Device.objects.filter(id=device_id).exists():
+            device = Device.objects.get(id=device_id)
+            device.valid = 'waiting'
+            device.reason = reason
+
+            shelf_order = ShelfOrder()
+            shelf_order.device_id = device.id
+            shelf_order.owner_name = device.owner
+            shelf_order.reason = device.reason
+            shelf_order.state = 'waiting'
+            device.save()
+            shelf_order.save()
+            JsonResponse({"message": "ok"})
+
+        else:
+            JsonResponse({"error":"no device"})
+    pass
 
 
 # 改变我的设备状态：
@@ -193,7 +216,7 @@ def owner_order_list(request):
                 owner = device.owner
                 device_name = device.device_name
                 location = device.location
-                if (True or  owner == request.session['username']) and \
+                if (owner == request.session['username']) and \
                         (device_id == -1 or device_id == renting_order.device_id) and \
                         (valid == 'none' or valid == renting_order.valid) and \
                         (rent_state == 'none' or rent_state == renting_order.rent_state):

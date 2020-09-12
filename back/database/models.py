@@ -37,7 +37,7 @@ class RentingOrder(models.Model):
     start = models.DateField(max_length=64, default=None)
     due = models.DateField(max_length=64, default=None)
     valid = models.CharField(max_length=64, default=None)
-    rent_state = models.CharField(max_length=64, default='0')
+    rent_state = models.CharField(max_length=64, default='default')
     rent_start = models.DateField(max_length=64, default=None)
     rent_end = models.DateField(max_length=64, default=None)
 
@@ -47,10 +47,9 @@ class ShelfOrder(models.Model):
     owner_name = models.CharField(max_length=64, default=None)
     reason = models.TextField(max_length=2000, default=None)
     state = models.CharField(max_length=64, default=None)
-    start_time = models.DateField(max_length=64, default=None)
 
 
 class ApplyOrder(models.Model):
-    user_id = models.CharField(max_length=64, default=None)
+    user_id = models.IntegerField(max_length=64, default=None)
     reason = models.TextField(max_length=2000, default=None)
     state = models.CharField(max_length=64, default=None)

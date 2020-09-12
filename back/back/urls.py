@@ -9,6 +9,7 @@ from fzr.views import owner_device_add
 from fzr.views import owner_device_change
 from fzr.views import owner_order_list
 from fzr.views import owner_device_order_change
+from fzr.views import owner_device_waiting
 from django.conf.urls import url
 from szl import views
 from zsw.views import login
@@ -25,6 +26,9 @@ from zsw.views import get_order_history
 from zsw.views import get_self_rented_device
 from zsw.views import apply_to_be_offer
 from zsw.views import get_device_reserved_info
+from zsw.views import get_application_message
+from zsw.views import get_renting_message
+from zsw.views import get_shelf_message
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -46,6 +50,7 @@ urlpatterns = [
     url(r'^owner/device/add$', owner_device_add),
     url(r'^owner/device/change$', owner_device_change),
     url(r'^owner/device/order$', owner_order_list),
+    url(r'^owner/device/waiting$', owner_device_waiting),
     url(r'^owner/device/order/change$', owner_device_order_change),
     url(r'^login$', login),
     url(r'^logout$', logout),
@@ -61,6 +66,9 @@ urlpatterns = [
     url(r'^user/device/own$', get_self_rented_device),
     url(r'^user/apply$', apply_to_be_offer),
     url(r'^user/device/reserved$', get_device_reserved_info),
+    url(r'^message/apply$', get_application_message),
+    url(r'^message/rent$', get_renting_message),
+    url(r'^message/shelf$', get_shelf_message),
     url(r'^my$', my),
     url(r'/boss/static$',views.Statistics)
 ]

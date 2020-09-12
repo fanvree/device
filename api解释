@@ -11,7 +11,15 @@ Response:
 }
 
 学院平台助理(超级管理员)：
-
+0.1 统计界面展示
+Method:GET
+URL:/boss/static
+QueryParam:
+{
+}
+Response:{
+'pie':'' #返回了设备状态的饼状图，返回形式是二进制流
+}
 ################################################ ZSW
 1.1、查询用户信息：
 Method:GET
@@ -509,8 +517,19 @@ Response:
 }
 
 
-2.3删除设备：（valid=delete）
 2.4上架设备：（）
+Method:GET
+URL：/owner/device/waiting
+QueryParam:
+{
+	'deviceid': '101',
+	'reason':
+}
+Response:
+{
+}
+
+2.3删除设备：（valid=delete）
 2.5下架设备：（）
 # 改变我的设备状态valid：on_shelf on_order off_shelf renting   delete(删除设备)
 Method:GET
@@ -584,35 +603,63 @@ QueryParam:
 }
 
 
-#####################################  ZSW
+############################### ZSW
+# 普通用户和设备提供者显示
 Method: GET
-Url: /user/message
+Url: /message/apply
 QueryParam:
 {
-	"userid": 101	# 如果能找乙宁解决昨天我们遇到的那个问题 这个userid就可以不带 目前先带着吧
 }
 Response:
 {
-	"type": "RentingOrder"/"ApplyOrder"	# 前者为租借申请 后者为成为设备提供者的申请
-	"state": "failed"/"passed"
-	"reason": ""		# 申请时的理由（而非通过或拒绝理由）
-	"devicename": "自动机"/""	# 成为设备提供者时该项值为""
+	"message_list": [
+		{
+			"state": "failed"/"passed"
+			"reason": ""		# 申请时的理由（而非通过或拒绝理由）
+			"devicename": "自动机"/""	# 成为设备提供者时该项值为""
+			"deviceid": 101
+		}
+	]
 }
 
-
-#####################################  ZSW
+############################### ZSW
+# 普通用户和设备提供者
 Method: GET
-Url: /owner/message
+Url: /message/rent
 QueryParam:
 {
-	"userid": 101	# 如果能找乙宁解决昨天我们遇到的那个问题 这个userid就可以不带 目前先带着吧
 }
 Response:
 {
-	"state": "failed"/"passed"
-	"reason": ""		# 申请时的理由（而非通过或拒绝理由）
-	"devicename": "自动机"
+	"message_list": [
+		{
+			"state": "failed"/"passed"
+			"reason": ""		# 申请时的理由（而非通过或拒绝理由）
+			"devicename": "自动机"
+			"deviceid": 101
+		}
+	]
 }
+
+############################### ZSW
+# 设备提供者
+Method: GET
+Url: /massage/shelf
+QueryParam:
+{
+}
+Response:
+{
+	"message_list": [
+		{
+			"state": "failed"/"passed"
+			"reason": ""		# 申请时的理由（而非通过或拒绝理由）
+			"devicename": "自动机"
+			"deviceid": 101
+		}
+	]
+}
+
 
 
 

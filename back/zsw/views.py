@@ -25,8 +25,7 @@ def login(request):
 
         request.session['username'] = username
         request.session['is_login'] = True
-        return JsonResponse({'state': 1,'identity': models.User.objects.get(username=username).identity})
-    return JsonResponse({'state': 0,'identity': 'none'})
+        return JsonResponse({'state': 1, 'identity': models.User.objects.get(username=username).identity})
 
 
 # 1.3.4: for all users: logout
@@ -98,6 +97,14 @@ def delete_user(request):
         username = models.User.objects.get(id=userid)
         if models.RentingOrder.objects.filter(username=username, rent_state='renting').exists():
             return JsonResponse({'error': 'the user is using a device'})
+
+        # delete all application, renting and shelf orders of this user
+        for order in models.ApplyOrder.objects.filter(user_id=userid):
+            models.ApplyOrder.objects.get(id=order.id).delete()
+        for order in models.RentingOrder.objects.filter(username=username):
+            models.RentingOrder.objects.get(id=order.id).delete()
+        for order in models.ShelfOrder.objects.filter(owner_name=username):
+            models.ShelfOrder.objects.get(id=order.id).delete()
         models.User.objects.get(id=userid).delete()
         return JsonResponse({'ok': 'deleted'})
 
@@ -120,7 +127,7 @@ def set_user(request):
         userid = int(userid)
         user = models.User.objects.get(id=userid)
         user.identity = identity
-        print(userid,identity)
+        print(userid, identity)
         user.save()
         return JsonResponse({'ok': 'set'})
 
@@ -129,9 +136,9 @@ def set_user(request):
 def get_device(request):
     if request.method == 'GET':
         admin = models.User.objects.get(username=request.session['username'])
-
         if admin.identity == 'normal':
             return JsonResponse({'error': 'low permission'})
+
         valid = request.GET.get('valid') if request.GET.get('valid') != None else 'none'
         device_name = request.GET.get('devicename')
         print(device_name)
@@ -206,6 +213,12 @@ def delete_device(request):
         device = models.Device.objects.get(id=device_id)
         if device.valid == 'renting':
             return JsonResponse({'error': 'device is rented'})
+
+        # delete all the renting orders and shelf orders related to this device
+        for order in models.RentingOrder.objects.filter(device_id=device_id):
+            models.RentingOrder.objects.get(id=order.id).delete()
+        for order in models.ShelfOrder.objects.filter(device_id=device_id):
+            models.ShelfOrder.objects.get(id=order.id).delete()
         models.Device.objects.get(id=device_id).delete()
         return JsonResponse({'message': 'ok'})
 
@@ -265,8 +278,8 @@ def order_device(request):
             #         or (start_time < order.start and order.start< due_time)):
             if not (order.due < start_time or due_time < order.start):
                 o = {}
-                o['start'] = order.start
-                o['due'] = order.due
+                o['start'] = str(order.start.year) + '-' + str(order.start.month) + '-' + str(order.start.day)
+                o['due'] = str(order.due.year) + '-' + str(order.due.month) + '-' + str(order.due.day)
                 o['username'] = order.username
                 o['contact'] = order.contact
                 return JsonResponse({
@@ -274,13 +287,8 @@ def order_device(request):
                     'order': o
                 })
         device_id = int(device_id)
-        print(request.session)
         username = request.session['username']
         contact = models.User.objects.get(username=username).contact
-        print(start)
-        print(due)
-        print(type(start))
-        print(type(due))
         models.RentingOrder.objects.create(
             device_id=device_id,
             username=username,
@@ -301,21 +309,26 @@ def order_device(request):
 def get_order_history(request):
     if request.method == 'GET':
         username = request.session['username']
-        order_list = models.RentingOrder.objects.filter(user=username)
+        order_list = models.RentingOrder.objects.filter(username=username)
         total = len(order_list)
+        print(total)
+        print(len(models.RentingOrder.objects.all()))
         o_list = []
         for order in order_list:
+            if not models.Device.objects.filter(id=order.device_id).exists():
+                continue
             device = models.Device.objects.get(id=order.device_id)
             o = {}
             o['orderid'] = order.id
             o['devicename'] = device.device_name
             o['owner'] = device.owner
             o['user'] = order.username
-            o['start'] = order.start
-            o['due'] = order.due
+            o['start'] = str(order.start.year) + '-' + str(order.start.month) + '-' + str(order.start.day)
+            o['due'] = str(order.due.year) + '-' + str(order.due.month) + '-' + str(order.due.day)
             o['location'] = device.location
             o['addition'] = device.addition
             o['state'] = order.valid
+            o_list.append(o)
         return JsonResponse({
             'total': total,
             'orderlist': o_list,
@@ -326,36 +339,24 @@ def get_order_history(request):
 def get_self_rented_device(request):
     if request.method == 'GET':
         username = request.session['username']
-        device_list = models.Device.objects.filter(user=username)
-
-        total = len(device_list)
-        d_list = []
-        for device in device_list:
+        order_list = models.RentingOrder.objects.filter(username=username, rent_state='renting')
+        total = len(order_list)
+        device_list = []
+        for order in order_list:
+            if not models.Device.objects.filter(id=order.device_id).exists():
+                continue
+            device = models.Device.objects.get(id=order.device_id)
             d = {}
-            d['deviceid'] = device.id
             d['devicename'] = device.device_name
             d['owner'] = device.owner
-            d['phone'] = device.owner_phone
             d['location'] = device.location
             d['addition'] = device.addition
-            d['valid'] = device.valid
-            d['reason'] = device.reason
-            d['orderlist'] = []
-            d_list.append(d)
-        for order in models.RentingOrder.objects.all():
-            for d in d_list:
-                if order.device_id == d['deviceid']:
-                    o = {}
-                    o['username'] = order.username
-                    o['reason'] = order.reason
-                    o['contact'] = order.contact
-                    o['start'] = order.start
-                    o['due'] = order.due
-                    o['valid'] = o['valid']
-                    d['orderlist'].append(o)
+            time_delta = order.due - date.today()
+            d['time_to_expiration'] = time_delta.days
+            device_list.append(d)
         return JsonResponse({
             'total': total,
-            'devicelist': d_list,
+            'devicelist': device_list,
         })
 
 
@@ -367,7 +368,7 @@ def apply_to_be_offer(request):
         if user_id == None or reason == None:
             return JsonResponse({'error': 'parameters missing'})
         user_id = int(user_id)
-        if user_id != models.User.objects.get(id=request.session['username']):
+        if user_id != models.User.objects.get(username=request.session['username']).id:
             return JsonResponse({'error': 'invalid user id'})
         models.ApplyOrder.objects.create(user_id=user_id, reason=reason, state='waiting')
         return JsonResponse({'ok': 'submitted'})
@@ -375,14 +376,12 @@ def apply_to_be_offer(request):
 
 # 2.7.0:for normal users: to get reserved information of one device
 def get_device_reserved_info(request):
-    print("000")
     if request.method == 'GET':
         device_id = request.GET.get('deviceid')
         print(device_id)
         device = models.Device.objects.get(id=device_id)
         # username = request.session['username']
         d = {}
-        print("111")
         d['deviceid'] = device.id
         d['devicename'] = device.device_name
         d['owner'] = device.owner
@@ -392,16 +391,14 @@ def get_device_reserved_info(request):
         d['valid'] = device.valid
         d['reason'] = device.reason
         d['orderlist'] = []
-        print("222")
 
         for order in models.RentingOrder.objects.all():
             o = {}
             o['user'] = order.username
-            o['start'] = order.start
-            o['due'] = order.due
+            o['start'] = str(order.start.year) + '-' + str(order.start.month) + '-' + str(order.start.day)
+            o['due'] = str(order.due.year) + '-' + str(order.due.month) + '-' + str(order.due.day)
             o['contact'] = order.contact
             d['orderlist'].append(o)
-        print("333")
         return JsonResponse(d)
 
 
@@ -423,3 +420,73 @@ def get_single_device_info(request):
         d['valid'] = device.valid
         d['reason'] = device.reason
         return JsonResponse(d)
+
+
+# get application messages of users(normal users and device providers)
+def get_application_message(request):
+    if request.method == 'GET':
+        username = request.session['username']
+        user = models.User.objects.get(username=username)
+        message_list = []
+        for order in models.ApplyOrder.objects.filter(user_id=user.id):
+            if not models.ApplyOrder.objects.filter(id=order.device_id).exists():
+                continue
+            message = {}
+            message['type'] = 'ApplyOrder'
+            message['state'] = order.state
+            message['reason'] = order.reason
+            message['devicename'] = ''
+            message['deviceid'] = 0
+            message_list.append(message)
+        total = len(message_list)
+        return JsonResponse({
+            'total': total,
+            'message_list': message_list
+        })
+
+
+# get renting messages of users(normal users and device providers)
+def get_renting_message(request):
+    if request.method == 'GET':
+        username = request.session['username']
+        # user = models.User.objects.get(username=username)
+        message_list = []
+        for order in models.RentingOrder.objects.filter(username=username):
+            if not models.RentingOrder.objects.filter(id=order.device_id).exists():
+                continue
+            message = {}
+            message['type'] = 'RentingOrder'
+            message['state'] = order.valid
+            message['reason'] = order.reason
+            message['deviceid'] = order.device_id
+            device = models.RentingOrder.objects.get(id=order.device_id)
+            message['devicename'] = device.device_name
+            message_list.append(message)
+        total = len(message_list)
+        return JsonResponse({
+            'total': total,
+            'message_list': message_list
+        })
+
+
+# get shelf messages of device providers
+def get_shelf_message(request):
+    if request.method == 'GET':
+        username = request.session['username']
+        # user = models.User.objects.get(username=username)
+        message_list = []
+        for order in models.ShelfOrder.objects.filter(owner_name=username):
+            if not models.ShelfOrder.objects.filter(id=order.device_id).exists():
+                continue
+            message = {}
+            message['state'] = order.state
+            message['reason'] = order.reason
+            message['deviceid'] = order.device_id
+            device = models.Device.objects.get(id=order.device_id)
+            message['devicename'] = device.device_name
+            message_list.append(message)
+        total = len(message_list)
+        return JsonResponse({
+            'total': total,
+            'message_list': message_list
+        })

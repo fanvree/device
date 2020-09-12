@@ -2,18 +2,17 @@ from django.shortcuts import render
 
 # Create your views here.
 
-from django.http import JsonResponse
+from django.http import JsonResponse, StreamingHttpResponse, HttpResponse
 from database import models
-import numpy as np
-from scipy import stats
 import matplotlib.pyplot as plt
 import io
-import PIL
-from PIL import Image,ImageFont,ImageDraw
-from flask import request
+import base64
+
 
 def GetOrderList(request): #获得用户租借申请的列表
     if request.method == 'GET':
+        # page = request.GET.get('page')
+        # size = request.GET.get('size')
         valid = request.GET.get('valid')
         answer_list = []  #最终返回的列表
         # order_list，根据valid信息取出来RentingOrder列表
@@ -28,6 +27,8 @@ def GetOrderList(request): #获得用户租借申请的列表
 
         #根据页数和个数得到相应的RentingOrder，再转成字典、压入列表
         for order in order_list:
+            if not models.Device.objects.filter(id=order.device_id).exists():
+                continue
             device=models.Device.objects.get(id=order.device_id)
             part_answer={}#记录此返回消息的字典
             part_answer['orderid']=order.id
@@ -47,6 +48,22 @@ def GetOrderList(request): #获得用户租借申请的列表
     else:
         return JsonResponse({'error':'require GET'})
 
+
+def conflict(start_time, due_time, device_id):
+    for order in models.RentingOrder.objects.filter(device_id=int(device_id), valid='passed'):
+        if not (order.due < start_time or due_time < order.start):
+            o = {}
+            o['start'] = str(order.start.year) + '-' + str(order.start.month) + '-' + str(order.start.day)
+            o['due'] = str(order.due.year) + '-' + str(order.due.month) + '-' + str(order.due.day)
+            o['username'] = order.username
+            o['contact'] = order.contact
+            return JsonResponse({
+                'error': 'illegal application for duration collision',
+                'order': o
+            })
+    return False
+
+
 def ChangeOrderState(request): #改变RentingOrder的状态
     if request.method=='GET':
         orderid=request.GET.get('orderid')
@@ -56,9 +73,11 @@ def ChangeOrderState(request): #改变RentingOrder的状态
         device=models.Device.objects.get(id=order.device_id)
         print(orderid,' ',state)
         if state==0:#改变device的valid和user
+            if conflict(order.start, order.due, device.id) != False:
+                return conflict(order.start, order.due, device)
             order.valid='passed'
-            #device.valid='renting'
-            #device.user=order.username
+            device.valid='renting'
+            device.user=order.username
         elif state==1:#如果是等待或者失败则不更改device的状态
             order.valid='waiting'
         elif state==2:
@@ -99,11 +118,16 @@ def GetOfferList(request):#查看设备提供者申请列表
         for offer in offer_list:
             part_answer={}
             part_answer['offerid']=offer.id
-            user=models.User.objects.get(id=offer.user_id)
-            part_answer['applicant']=user.username
+            if models.User.objects.filter(id=offer.user_id).exists():
+                part_answer['applicant'] = models.User.objects.get(id=offer.user_id).username
+            else:
+                continue
+                # part_answer['applicant'] = '用户' + str(offer.user_id) + '已经删除'
             part_answer['reason']=offer.reason
             answer_list.append(part_answer)
         total=len(answer_list)
+        # print(total)
+        # print(answer_list)
         return JsonResponse({'total':total,'offerlist':answer_list})
     else:
         return JsonResponse({'error': 'require GET'})
@@ -111,9 +135,11 @@ def GetOfferList(request):#查看设备提供者申请列表
 def ChangeOfferState(request):#改变用户申请成为设备提供者的状态，
     if request.method=='GET':
         offerid=request.GET.get('offerid')
-        state=request.GET.get('state')
+        state=int(request.GET.get('state'))
         print(offerid,state)
         offer=models.ApplyOrder.objects.get(id=offerid)
+        if not models.User.objects.filter(id=offer.user_id).exists():
+            return JsonResponse({"message": "error"})
         user=models.User.objects.get(id=offer.user_id)
         if state==0:#改变user的identitiy
             offer.state='passed'
@@ -123,8 +149,10 @@ def ChangeOfferState(request):#改变用户申请成为设备提供者的状态�
         elif state==2:
             offer.state='failed'
         else:
+            print("nochange")
             pass
-
+        offer.save()
+        user.save()
         return JsonResponse({})
     else:
         return JsonResponse({'error': 'require GET'})
@@ -132,7 +160,7 @@ def ChangeOfferState(request):#改变用户申请成为设备提供者的状态�
 def DeleteOffer(request):#删除用户成为设备提供者的申请
     if request.method=='POST':
         offerid=request.POST.get('offerid')
-        offer=models.ApplyOrder.objects.get(id=offerid)
+        offer=models.ApplyOrder.objects.filter(id=offerid)
         offer.delete()
         return JsonResponse({"message": "ok"})
     else:
@@ -140,9 +168,9 @@ def DeleteOffer(request):#删除用户成为设备提供者的申请
 
 def GetShelfList(request):#得到设备上架请求列表
     if request.method=='GET':
-        #page=request.GET.get('page')
-        #size=request.GET.get('size')
-        state=request.GET.get('state')
+        # page=request.GET.get('page')
+        # size=request.GET.get('size')
+        state = request.GET.get('state')
 
         if state=='waiting':
             tmp_shelf_list=models.ShelfOrder.objects.filter(state='waiting')
@@ -158,12 +186,15 @@ def GetShelfList(request):#得到设备上架请求列表
             part_answer={}
             part_answer['shelfid']=shelf.id
             part_answer['ownername']=shelf.owner_name
-
-            device=models.Device.objects.get(id=shelf.device_id)
+            if models.Device.objects.filter(id=shelf.device_id).exists():
+                device=models.Device.objects.get(id=shelf.device_id)
+            else:
+                continue
             part_answer['devicename']=device.device_name
             part_answer['location']=device.location
             part_answer['addition']=device.addition
             part_answer['reason']=shelf.reason
+            part_answer['state']=shelf.state
 
             answer_list.append(part_answer)
         total=len(answer_list)
@@ -209,8 +240,9 @@ def DeleteShelf(request):#删除上架申请
     else:
         return JsonResponse({'error':'require POST'})
 
+
 def Statistics(request):
-    labels='下架','在架','借出','等待审批'
+    labels='off shelf' ,'on shelf','renting','waiting approve'
     num_off_shelf=0
     num_on_shelf=0
     num_renting=0
@@ -228,25 +260,82 @@ def Statistics(request):
             num_on_order=num_on_order+1
         else:
             pass
-    num_sum=num_on_order+num_renting+num_on_shelf+num_off_shelf
-    sizes=[num_off_shelf*100/num_sum,num_on_shelf*100/num_sum,num_renting*100/num_sum,num_on_order*100/num_sum]
+    #num_sum=num_on_order+num_renting+num_on_shelf+num_off_shelf
+    sizes=[num_off_shelf,num_on_shelf,num_renting,num_on_order]
     #sizes=[25,25,25,25]
     explode=(0,0,0,0.1)
     fig1,ax1=plt.subplots()
     ax1.pie(sizes,explode=explode,labels=labels,
             autopct='%1.1f%%',shadow=True,startangle=90)
     ax1.axis('equal')
-
-    plt.show()
-    canvas=fig1.canvas
-
-    buffer=io.BytesIO()
+    canvas = fig1.canvas
+    print(canvas)
+    buffer = io.BytesIO()
     canvas.print_png(buffer)
-    data=buffer.getvalue()
+    data = buffer.getvalue()
     buffer.close()
 
-    return render({'pie':data})
+    labels2='admin','owner','user'
+    num_admin=0
+    num_owner=0
+    num_user=0
+    Users=models.User.objects.all()
+    for user in Users:
+        if user.identity=='admin':
+            num_admin=num_admin+1
+        elif user.identity=='renter':
+            num_owner=num_owner+1
+        elif user.identity=='normal':
+            num_user=num_user+1
+        else:
+            pass
+    #user_sum=num_admin+num_owner+num_user
+    sizes2 = [num_admin,num_owner,num_user]
+    explode2 = (0.1,0,0)
+    fig2, ax2 = plt.subplots()
+    ax2.pie(sizes2, explode=explode2, labels=labels2,
+            autopct='%1.1f%%', shadow=True, startangle=90)
+    ax2.axis('equal')
+    canvas2 = fig2.canvas
+    print(canvas2)
+    buffer = io.BytesIO()
+    canvas2.print_png(buffer)
+    data2 = buffer.getvalue()
+    buffer.close()
+
+    labels3='passed','failed','waiting'
+    num_passed=0
+    num_failed=0
+    num_waiting=0
+    RentOrders=models.RentingOrder.objects.all()
+    for rentorder in RentOrders:
+        if rentorder.valid=='passed':
+            num_passed=num_passed+1
+        elif rentorder.valid=='failed':
+            num_failed=num_failed+1
+        elif rentorder.valid=='waiting':
+            num_waiting=num_waiting+1
+        else:
+            pass
+    #sum3=num_passed+num_failed+num_waiting
+    sizes3 = [num_passed , num_owner, num_user]
+    explode3=(0,0,0.1)
+    fig3, ax3 = plt.subplots()
+    ax3.pie(sizes3, explode=explode3, labels=labels3,
+            autopct='%1.1f%%', shadow=True, startangle=90)
+    ax3.axis('equal')
+    canvas3 = fig3.canvas
+    print(canvas3)
+    buffer = io.BytesIO()
+    canvas3.print_png(buffer)
+    data3 = buffer.getvalue()
+    buffer.close()
+    datalist=[data,data2,data3]
 
 
 
+    # plt.show()
 
+    resp = HttpResponse(datalist)
+    resp["Content-Type"] = "image/jpeg"
+    return resp
