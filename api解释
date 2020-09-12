@@ -135,7 +135,7 @@ QueryParam:
 {
 	'page': 1
 	'size': 20
-	'valid':'none','passed','failed','waited'
+	'valid':'none','passed','failed','waiting'
 }
 Response:
 {
@@ -210,7 +210,11 @@ QueryParam:
 }
 Response:{}
 
+<<<<<<< HEAD
+5.4 删除提供者申请：
+=======
 5.3 删除租借申请：
+>>>>>>> 25db6b87f0987a4efcaf23d95bdd29e0ae8a3dff
 Method:POST
 URL：/boss/offer/delete
 Request:
@@ -241,7 +245,10 @@ Response:
 		'location':'东主楼',//设备所在地点
 		'addition':'设备的备注，或者说是详细信息',
 		'reason': '申请理由',
+<<<<<<< HEAD
+=======
 		'state': 'on_order'
+>>>>>>> 25db6b87f0987a4efcaf23d95bdd29e0ae8a3dff
 	}
 	]
 }
@@ -262,8 +269,15 @@ Request:
 	'shelfid': '1',
 }
 Response:{}
+<<<<<<< HEAD
+<<<<<<< HEAD
 
+=======
+=======
+
+>>>>>>> 25db6b87f0987a4efcaf23d95bdd29e0ae8a3dff
 ################################################ SZL
+>>>>>>> b2545e3391e3034256a40140826e5d58cb692f7b
 7、统计信息？再说吧
 Method:GET
 URL: /boss/device/filter

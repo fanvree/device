@@ -2,8 +2,12 @@ from django.shortcuts import render
 
 # Create your views here.
 
-from django.http import JsonResponse
+from django.http import JsonResponse, StreamingHttpResponse, HttpResponse
 from database import models
+import matplotlib.pyplot as plt
+import io
+import base64
+
 
 def GetOrderList(request): #获得用户租借申请的列表
     if request.method == 'GET':
@@ -238,7 +242,7 @@ def DeleteShelf(request):#删除上架申请
 
 
 def Statistics(request):
-    labels='下架','在架','借出','等待审批'
+    labels='off shelf' ,'on shelf','renting','waiting approve'
     num_off_shelf=0
     num_on_shelf=0
     num_renting=0
@@ -256,21 +260,82 @@ def Statistics(request):
             num_on_order=num_on_order+1
         else:
             pass
-    num_sum=num_on_order+num_renting+num_on_shelf+num_off_shelf
-    sizes=[num_off_shelf*100/num_sum,num_on_shelf*100/num_sum,num_renting*100/num_sum,num_on_order*100/num_sum]
+    #num_sum=num_on_order+num_renting+num_on_shelf+num_off_shelf
+    sizes=[num_off_shelf,num_on_shelf,num_renting,num_on_order]
     #sizes=[25,25,25,25]
     explode=(0,0,0,0.1)
     fig1,ax1=plt.subplots()
     ax1.pie(sizes,explode=explode,labels=labels,
             autopct='%1.1f%%',shadow=True,startangle=90)
     ax1.axis('equal')
-
-    plt.show()
-    canvas=fig1.canvas
-
-    buffer=io.BytesIO()
+    canvas = fig1.canvas
+    print(canvas)
+    buffer = io.BytesIO()
     canvas.print_png(buffer)
-    data=buffer.getvalue()
+    data = buffer.getvalue()
     buffer.close()
 
-    return render({'pie':data})
+    labels2='admin','owner','user'
+    num_admin=0
+    num_owner=0
+    num_user=0
+    Users=models.User.objects.all()
+    for user in Users:
+        if user.identity=='admin':
+            num_admin=num_admin+1
+        elif user.identity=='renter':
+            num_owner=num_owner+1
+        elif user.identity=='normal':
+            num_user=num_user+1
+        else:
+            pass
+    #user_sum=num_admin+num_owner+num_user
+    sizes2 = [num_admin,num_owner,num_user]
+    explode2 = (0.1,0,0)
+    fig2, ax2 = plt.subplots()
+    ax2.pie(sizes2, explode=explode2, labels=labels2,
+            autopct='%1.1f%%', shadow=True, startangle=90)
+    ax2.axis('equal')
+    canvas2 = fig2.canvas
+    print(canvas2)
+    buffer = io.BytesIO()
+    canvas2.print_png(buffer)
+    data2 = buffer.getvalue()
+    buffer.close()
+
+    labels3='passed','failed','waiting'
+    num_passed=0
+    num_failed=0
+    num_waiting=0
+    RentOrders=models.RentingOrder.objects.all()
+    for rentorder in RentOrders:
+        if rentorder.valid=='passed':
+            num_passed=num_passed+1
+        elif rentorder.valid=='failed':
+            num_failed=num_failed+1
+        elif rentorder.valid=='waiting':
+            num_waiting=num_waiting+1
+        else:
+            pass
+    #sum3=num_passed+num_failed+num_waiting
+    sizes3 = [num_passed , num_owner, num_user]
+    explode3=(0,0,0.1)
+    fig3, ax3 = plt.subplots()
+    ax3.pie(sizes3, explode=explode3, labels=labels3,
+            autopct='%1.1f%%', shadow=True, startangle=90)
+    ax3.axis('equal')
+    canvas3 = fig3.canvas
+    print(canvas3)
+    buffer = io.BytesIO()
+    canvas3.print_png(buffer)
+    data3 = buffer.getvalue()
+    buffer.close()
+    datalist=[data,data2,data3]
+
+
+
+    # plt.show()
+
+    resp = HttpResponse(datalist)
+    resp["Content-Type"] = "image/jpeg"
+    return resp

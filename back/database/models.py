@@ -25,6 +25,7 @@ class Device(models.Model):
     location = models.CharField(max_length=64, default=None)
     addition = models.CharField(max_length=64, default=None)
     valid = models.CharField(max_length=64, default=None)
+    #off_shelf on_shelf renting on_order
     reason = models.CharField(max_length=64, default=None)
 
 
