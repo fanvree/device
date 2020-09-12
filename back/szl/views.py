@@ -115,12 +115,14 @@ def GetOfferList(request):#查看设备提供者申请列表
             part_answer={}
             part_answer['offerid']=offer.id
             if models.User.objects.filter(id=offer.user_id).exists():
-                part_answer['applicant'] = models.User.objects.get(id=offer.user_id)
+                part_answer['applicant'] = models.User.objects.get(id=offer.user_id).username
             else:
                 part_answer['applicant'] = '用户' + str(offer.user_id) + '已经删除'
             part_answer['reason']=offer.reason
             answer_list.append(part_answer)
         total=len(answer_list)
+        # print(total)
+        # print(answer_list)
         return JsonResponse({'total':total,'offerlist':answer_list})
     else:
         return JsonResponse({'error': 'require GET'})
