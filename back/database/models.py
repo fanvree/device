@@ -9,8 +9,8 @@ class User(models.Model):
     password = models.CharField(max_length=1000, default=None)
     email = models.CharField(max_length=64, default=None)
     contact = models.CharField(max_length=64, default=None)
-    identity = models.CharField(max_length=64, default=None)#normal owner admin
-    apply = models.CharField(max_length=64, default=None)#用户成为提供者的
+    identity = models.CharField(max_length=64, default=None)    # normal owner admin
+    apply = models.CharField(max_length=64, default=None)       # 用户成为提供者的
     token = models.CharField(max_length=64, default=None)
 
 
@@ -49,7 +49,14 @@ class ShelfOrder(models.Model):
 
 
 class ApplyOrder(models.Model):
-    user_id = models.IntegerField(max_length=64, default=None)
+    user_id = models.IntegerField(default=0)
     reason = models.TextField(max_length=2000, default=None)
     state = models.CharField(max_length=64, default=None)
-    #failed passed waiting 默认waiting、
+    # failed passed waiting 默认waiting、
+
+
+class Comment(models.Model):
+    username_from = models.CharField(max_length=64, default=None)
+    username_to = models.CharField(max_length=64, default=None)
+    content = models.TextField(max_length=2000, default=None)
+    time = models.DateTimeField(max_length=64, default=None)
