@@ -10,13 +10,13 @@ import time
 from django.core.mail import send_mail
 from django.conf import settings
 from django.utils.deprecation import MiddlewareMixin
-
+from datetime import datetime
 from database.models import User
 from database.models import Device
 from database.models import RentingOrder
 from database.models import ShelfOrder
+from database.models import Judgement
 from django.utils import timezone
-
 
 
 def send_register_email(to, code):
@@ -58,7 +58,8 @@ def send_email(request):
 # 完成注册
 def logon(request):
     # print(request.POST)
-    if ('username' in request.POST) and ('email' in request.POST) and ('code' in request.POST) and ('password' in request.POST):
+    if ('username' in request.POST) and ('email' in request.POST) and ('code' in request.POST) and (
+            'password' in request.POST):
         username = request.POST['username']
         if not (User.objects.filter(username=username).exists()):
             email = request.POST['email']
@@ -101,7 +102,8 @@ def owner_mine(request):
     total = 0
     ret_list = []
     for device in show_list:
-        if (valid == 'none' or valid == device.valid) and (device_name == "" or device.device_name.find(device_name) != -1) \
+        if (valid == 'none' or valid == device.valid) and (
+                device_name == "" or device.device_name.find(device_name) != -1) \
                 and device.owner == request.session['username']:
             total += 1
             if ((page - 1) * size < total) and (total < page * size):
@@ -167,7 +169,7 @@ def owner_device_waiting(request):
             JsonResponse({"message": "ok"})
 
         else:
-            JsonResponse({"error":"no device"})
+            JsonResponse({"error": "no device"})
     pass
 
 
@@ -300,8 +302,52 @@ def my(request):
     })
 
 
+def add_judgement(request):
+    if request.method == 'GET':
+        device_id = request.GET['deviceid']
+        reason = request.GET['reason']
+        username = request.session['username']
+        if device_id == None or reason == None:
+            return JsonResponse({'error': 'params invalid'})
+        if not Device.objects.filter(id=device_id).exists():
+            return JsonResponse({'error': 'no device id'})
+        judgement = Judgement()
+        judgement.device_id = device_id
+        judgement.reason = request.GET['reason']
+        judgement.time = datetime.now()
+        judgement.username = username
+        judgement.device_name = Device.objects.get(id=device_id).device_name
+        judgement.save()
+        JsonResponse({'message': 'ok'})
+        # judgement.reason =
+    return JsonResponse({'error': 'require GET'})
+    pass
 
 
+def send_judgement(request):
+    if request.method == 'GET':
+        device_id = int(request.GET['deviceid'])
+        username = request.session['username']
+        if device_id is None:
+            return JsonResponse({'state': 0})
+        if not Device.objects.filter(id=device_id).exists():
+            return JsonResponse({'state': 0})
+        for renting_order in RentingOrder.objects.filter(device_id=device_id):
+            if renting_order.username == username and renting_order.valid == 'passed':
+                return JsonResponse({'state': 1})
+        return JsonResponse({'state': 0})
+    return JsonResponse({'state': 0})
+    pass
 
 
+def list_judgement(request):
+    if request.method == 'GET':
+        ret = []
+        device_id = int(request.GET['deviceid'])
+        if device_id is None:
+            return JsonResponse({'comment': {}})
+        for judgement in Judgement.objects.filter(device_id=device_id):
+            pass
+        return JsonResponse({'comment': {ret}})
+    pass
 

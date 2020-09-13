@@ -10,6 +10,9 @@ from fzr.views import owner_device_change
 from fzr.views import owner_order_list
 from fzr.views import owner_device_order_change
 from fzr.views import owner_device_waiting
+from fzr.views import add_judgement
+from fzr.views import send_judgement
+from fzr.views import list_judgement
 from django.conf.urls import url
 from szl import views
 from zsw.views import login
@@ -74,5 +77,8 @@ urlpatterns = [
     url(r'^comment/send$', send_comment),
     url(r'^comment/receive$', receive_comment),
     url(r'^my$', my),
-    url(r'^boss/static$', views.Statistics)
+    url(r'^boss/static$', views.Statistics),
+    url(r'^device/judgement/add$', add_judgement),
+    url(r'^device/judgement/send$', send_judgement),
+    url(r'^device/judgement/list$', list_judgement),
 ]

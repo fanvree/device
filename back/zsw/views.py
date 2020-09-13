@@ -38,6 +38,7 @@ def logout(request):
             return JsonResponse({'state': 1})   # success
         else:                   # session_id不存在或被注销
             return JsonResponse({'state': 0})   # fail
+    return JsonResponse({'state': 'require POST'})   # fail
 
 
 # 1.1.1: for admin: to get users under various filters
@@ -363,7 +364,10 @@ def get_self_rented_device(request):
 # 2.6.0:for normal users: to apply for higher identity(offer)
 def apply_to_be_offer(request):
     if request.method == 'POST':
-        user_id = request.POST.get('userid')
+        # user_id = request.POST.get('userid')
+        if request.session['username'] is None or not models.User.objects.filter(username=request.session['username']).exists():
+            return JsonResponse({'error': 'parameters missing'})
+        user_id = models.User.objects.get(username=request.session['username']).id
         reason = request.POST.get('reason')
         if user_id == None or reason == None:
             return JsonResponse({'error': 'parameters missing'})
