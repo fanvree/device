@@ -13,6 +13,7 @@ from fzr.views import owner_device_waiting
 from fzr.views import add_judgement
 from fzr.views import send_judgement
 from fzr.views import list_judgement
+from fzr.views import watch_dialog
 from django.conf.urls import url
 from szl import views
 from zsw.views import login
@@ -81,4 +82,5 @@ urlpatterns = [
     url(r'^device/judgement/add$', add_judgement),
     url(r'^device/judgement/send$', send_judgement),
     url(r'^device/judgement/list$', list_judgement),
+    url(r'^dialog$', watch_dialog),
 ]

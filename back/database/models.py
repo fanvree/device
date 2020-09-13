@@ -69,3 +69,7 @@ class Judgement(models.Model):
     device_name = models.CharField(max_length=64, default=None)
     reason = models.TextField(max_length=2000, default=None)
     time = models.DateTimeField(max_length=64, default=None)
+
+
+class Dialog(models.Model):
+    content = models.TextField(max_length=2000, default=None)

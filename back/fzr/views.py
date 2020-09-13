@@ -14,6 +14,7 @@ from datetime import datetime
 from database.models import User
 from database.models import Device
 from database.models import RentingOrder
+from database.models import Dialog
 from database.models import ShelfOrder
 from database.models import Judgement
 from django.utils import timezone
@@ -305,7 +306,7 @@ def my(request):
 def add_judgement(request):
     if request.method == 'GET':
         device_id = request.GET['deviceid']
-        reason = request.GET['reason']
+        reason = request.GET['comment']
         username = request.session['username']
         if device_id == None or reason == None:
             return JsonResponse({'error': 'params invalid'})
@@ -313,7 +314,7 @@ def add_judgement(request):
             return JsonResponse({'error': 'no device id'})
         judgement = Judgement()
         judgement.device_id = device_id
-        judgement.reason = request.GET['reason']
+        judgement.reason = reason
         judgement.time = datetime.now()
         judgement.username = username
         judgement.device_name = Device.objects.get(id=device_id).device_name
@@ -346,8 +347,26 @@ def list_judgement(request):
         device_id = int(request.GET['deviceid'])
         if device_id is None:
             return JsonResponse({'comment': {}})
+        device_name = "设备已删除"
+        if Device.objects.filter(id=device_id).exists():
+            device_name = Device.objects.get(id=device_id).device_name
+        total = 0
         for judgement in Judgement.objects.filter(device_id=device_id):
-            pass
-        return JsonResponse({'comment': {ret}})
+            item = {
+                'username': judgement.username,
+                'judgement': judgement.reason,
+                'time': judgement.time,
+            }
+            ret.append(item)
+            total += 1
+        return JsonResponse({'comment': {ret}, 'devicename': device_name, 'total': total})
     pass
 
+
+def watch_dialog():
+    total = 0
+    ret = []
+    for dialog in Dialog:
+        ret.append(dialog.content)
+        total += 1
+    return JsonResponse({'total': total, 'dialog': ret})
