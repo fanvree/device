@@ -1,5 +1,18 @@
 
 #######################fzr########
+
+查看系统日志：
+Method:GET
+URL:/dialog
+QueryParam:
+{
+}
+Response:{
+	total:101
+	'dialog':['','','','','',...]
+}
+
+
 添加评价：
 Method:GET
 URL:/device/judgement/add
