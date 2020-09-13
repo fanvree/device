@@ -35,8 +35,8 @@ def GetOrderList(request): #获得用户租借申请的列表
             part_answer['devicename'] = device.device_name
             part_answer['owner'] = device.owner
             part_answer['applicant'] = order.username
-            part_answer['start'] = order.start
-            part_answer['due']=order.due
+            part_answer['start'] = str(order.start.year) + '-' + str(order.start.month) + '-' + str(order.start.day)
+            part_answer['due']=str(order.start.year) + '-' + str(order.start.month) + '-' + str(order.start.day)
             part_answer['location']=device.location
             # part_answer['addition']=device.addition
             part_answer['addition']=order.reason
@@ -74,7 +74,7 @@ def ChangeOrderState(request): #改变RentingOrder的状态
         print(orderid,' ',state)
         if state==0:#改变device的valid和user
             if conflict(order.start, order.due, device.id) != False:
-                return conflict(order.start, order.due, device)
+                return conflict(order.start, order.due, device.id)
             order.valid='passed'
             device.valid='renting'
             device.user=order.username

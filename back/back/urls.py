@@ -74,5 +74,5 @@ urlpatterns = [
     url(r'^comment/send$', send_comment),
     url(r'^comment/receive$', receive_comment),
     url(r'^my$', my),
-    url(r'/boss/static$', views.Statistics)
+    url(r'^boss/static$', views.Statistics)
 ]
