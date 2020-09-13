@@ -80,6 +80,7 @@ def logon(request):
                 user.apply = "False"
                 user.token = ""
                 user.save()
+                add_dialog('用户%s注册了')
                 return JsonResponse({"state": 1})
             else:
                 return JsonResponse({"state": "注册失败code is error"})
