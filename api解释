@@ -1,3 +1,42 @@
+
+#######################fzr########
+添加评价：
+Method:GET
+URL:/device/judgement/add
+QueryParam:
+{
+	deviceid:'101',
+	comment: '',
+}
+Response:{}
+
+判断能否添加评价：
+Method:GET
+URL:/device/judgement/send
+QueryParam:
+{
+	deviceid:'101'
+}
+Response:{
+	'state':'1'可以/'0'不可以
+}
+
+查看评价
+Method:GET
+URL:/device/judgement/list
+QueryParam:
+{
+	deviceid:'101'
+}
+Response:{
+	comment:[
+          {'username': ,'judgement': ,'time':'2018.1.1'},
+]
+}
+
+##################
+
+
 1.0查询自己信息
 Method:GET
 URL：/my
@@ -667,8 +706,7 @@ Method: POST
 Url: /comment/send
 Request:
 {
-	'userid_from': 101,
-	'userid_to': 102,
+	'username_to': 102,
 	'content': '',
 }
 Response:
