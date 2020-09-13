@@ -80,7 +80,7 @@ def logon(request):
                 user.apply = "False"
                 user.token = ""
                 user.save()
-                add_dialog('第%d用户%s注册了,邮箱是%s'.format(user.id, username, email))
+                add_dialog('第{}用户{}完成注册,注册邮箱是{}'.format(user.id, username, email))
                 return JsonResponse({"state": 1})
             else:
                 return JsonResponse({"state": "注册失败code is error"})
@@ -126,7 +126,7 @@ def owner_mine(request):
                     'valid': device.valid,
                     'reason': device.reason,
                 })
-    add_dialog('设备管理者%s查看了属于TA的设备'.format(request.session['username']))
+    add_dialog('设备管理者{}查看了属于TA的设备'.format(request.session['username']))
     return JsonResponse({'devicelist': ret_list, 'total': total})
 
 
@@ -154,7 +154,7 @@ def owner_device_add(request):
         shelf_order.state = 'waiting'
         shelf_order.start_time = timezone.now().date()
         shelf_order.save()
-        add_dialog('设备管理者%s把设备%s添加进设备申请列表'.format(request.session['username'], request.POST['devicename']))
+        add_dialog('设备管理者{}把设备{}添加进设备申请列表'.format(request.session['username'], request.POST['devicename']))
         return JsonResponse({'state': 1})
 
 
@@ -175,7 +175,7 @@ def owner_device_waiting(request):
             device.save()
             shelf_order.save()
             JsonResponse({"message": "ok"})
-            add_dialog('设备管理者%s把设备%s添加进设备申请列表'.format(request.session['username'], device.device_name))
+            add_dialog('设备管理者{}把设备{}添加进设备申请列表'.format(request.session['username'], device.device_name))
 
         else:
             JsonResponse({"error": "no device"})
@@ -191,11 +191,11 @@ def owner_device_change(request):
             device = Device.objects.get(id=device_id)
             if valid == 'delete':
                 Device.objects.filter(id=device_id).delete()
-                add_dialog('设备管理者%s删除了设备%s'.format(request.session['username'], device.device_name))
+                add_dialog('设备管理者{}删除了设备{}'.format(request.session['username'], device.device_name))
             else:
                 device.valid = valid
                 device.save()
-                add_dialog('设备管理者%s改变设备%s状态'.format(request.session['username'], device.device_name))
+                add_dialog('设备管理者{}改变设备{}状态'.format(request.session['username'], device.device_name))
             return JsonResponse({"ok": "setting ok"})
         return JsonResponse({"error": "no deviceid"})
     return JsonResponse({"error": "valid parse"})
@@ -236,7 +236,7 @@ def owner_order_list(request):
                     total += 1
                     if ((page - 1) * size < total) and (total <= page * size):
                         ret.append({
-                            'ordid': renting_order.id,
+                            'orderid': renting_order.id,
                             'deviceid': renting_order.device_id,
                             'devicename': device_name,
                             'owner': owner,
@@ -250,7 +250,7 @@ def owner_order_list(request):
                             'rentstart': renting_order.rent_start,
                             'rentend': renting_order.rent_end,
                         })
-        add_dialog('设备管理者%s查看他TA的设备订单'.format(request.session['username']))
+        add_dialog('设备管理者{}查看他TA的设备订单'.format(request.session['username']))
         return JsonResponse({'orderlist': ret, 'total': total})
 
 
@@ -289,13 +289,13 @@ def owner_device_order_change(request):
                         device = Device.objects.get(id=renting_order.device_id)
                         device.valid = 'renting'
                         device.save()
-                        add_dialog('设备管理者%s确认借出了订单%d的设备'.format(request.session['username'], renting_order.id))
+                        add_dialog('设备管理者{}确认借出了订单{}的设备'.format(request.session['username'], renting_order.id))
                 elif rent_state == 'back':
                     renting_order.rent_end = timezone.now().date()
                     if Device.objects.filter(id=renting_order.device_id).exists():
                         device = Device.objects.get(id=renting_order.device_id)
                         device.valid = 'on_shelf'
-                        add_dialog('设备管理者%s确认归还了订单%d的设备'.format(request.session['username'], renting_order.id))
+                        add_dialog('设备管理者{}确认归还了订单{}的设备'.format(request.session['username'], renting_order.id))
                         device.save()
             renting_order.save()
         return JsonResponse({'ok': 'ok'})
@@ -333,7 +333,7 @@ def add_judgement(request):
         judgement.device_name = Device.objects.get(id=device_id).device_name
         judgement.save()
         JsonResponse({'message': 'ok'})
-        add_dialog('用户"%s"添加了设备"%s"评论'.format(request.session['username'], judgement.device_name))
+        add_dialog('用户"{}"添加了设备"{}"评论'.format(request.session['username'], judgement.device_name))
         # judgement.reason =
     return JsonResponse({'error': 'require GET'})
     pass
@@ -372,11 +372,11 @@ def list_judgement(request):
                 'username': judgement.username,
                 'judgement': judgement.reason,
                 # 'time': judgement.time,
-                'time': judgement.time.strftime('%y-%m-%b %H:%M:%S'),
+                'time': judgement.time.strftime('%Y-%m-%d %H:%M:%S'),
             }
             ret.append(item)
             total += 1
-        add_dialog('用户"%s"查看了编号为%d设备"%s"评论'.format(request.session['username'], device_id, device_name))
+        add_dialog('用户"{}"查看了编号为{}设备"{}"评论'.format(request.session['username'], device_id, device_name))
         return JsonResponse({'comment': ret, 'devicename': device_name, 'total': total})
     pass
 
@@ -385,7 +385,7 @@ def watch_dialog():
     total = 0
     ret = []
     for dialog in Dialog.objects.all():
-        ret.append({'content': dialog.content, 'time': dialog.time.strftime('%y-%m-%b %H:%M:%S')})
+        ret.append({'content': dialog.content, 'time': dialog.time.strftime('%Y-%m-%d %H:%M:%S')})
         total += 1
     add_dialog('管理员查看系统日志')
     return JsonResponse({'total': total, 'dialog': ret})

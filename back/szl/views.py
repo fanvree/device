@@ -243,7 +243,9 @@ def DeleteShelf(request):#删除上架申请
 
 def Statistics(request):
     parament=request.GET.get('parament')
-    if parament==0:
+    plt.rcParams['font.sans-serif'] = ['SimHei']
+    plt.rcParams['axes.unicode_minus'] = False
+    if parament=='0':
         labels='off shelf' ,'on shelf','renting','waiting approve'
         num_off_shelf=0
         num_on_shelf=0
@@ -277,8 +279,10 @@ def Statistics(request):
         canvas.print_png(buffer)
         data = buffer.getvalue()
         buffer.close()
-
-    elif parament==1:
+        resp = HttpResponse(data)
+        resp["Content-Type"] = "image/jpeg"
+        return resp
+    elif parament=='1':
         labels2='admin','owner','user'
         num_admin=0
         num_owner=0
@@ -304,10 +308,12 @@ def Statistics(request):
         print(canvas2)
         buffer = io.BytesIO()
         canvas2.print_png(buffer)
-        data = buffer.getvalue()
+        data2 = buffer.getvalue()
         buffer.close()
-
-    elif parament==2:
+        resp2 = HttpResponse(data2)
+        resp2["Content-Type"] = "image/jpeg"
+        return resp2
+    elif parament=='2':
         labels3='passed','failed','waiting'
         num_passed=0
         num_failed=0
@@ -323,7 +329,7 @@ def Statistics(request):
             else:
                 pass
         #sum3=num_passed+num_failed+num_waiting
-        sizes3 = [num_passed , num_owner, num_user]
+        sizes3 = [num_passed , num_failed, num_waiting]
         explode3=(0,0,0.1)
         fig3, ax3 = plt.subplots()
         ax3.pie(sizes3, explode=explode3, labels=labels3,
@@ -335,9 +341,50 @@ def Statistics(request):
         canvas3.print_png(buffer)
         data = buffer.getvalue()
         buffer.close()
-    else:
-        pass
 
-    resp = HttpResponse(data)
-    resp["Content-Type"] = "image/jpeg"
-    return resp
+        resp3 = HttpResponse(data)
+        resp3["Content-Type"] = "image/jpeg"
+        return resp3
+    elif parament=='3' or parament==3:
+        device_rent_list=[]
+        for rentorder in models.RentingOrder.objects.all():
+            if models.Device.objects.filter(id=rentorder.device_id).exists():
+                device=models.Device.objects.get(id=rentorder.device_id)
+                if_exist=False
+                #遍历
+                for elem in device_rent_list:
+                    if elem['id']==rentorder.device_id:
+                        if_exist=True
+                        elem['count']=elem['count']+1
+                    else:
+                        pass
+                if not if_exist:
+                    device_rent={}
+                    device_rent['device_name']=device.device_name
+                    device_rent['count']=1
+                    device_rent['id']=rentorder.device_id
+                    device_rent_list.append(device_rent)
+            else:
+                pass
+        device_rent_list.sort(key = lambda x:x['count'], reverse = True)
+
+        names=()
+        numbers=[]
+        for i in range(min(len(device_rent_list),5)):
+            tup=(device_rent_list[i]['device_name'],)
+            names = names + tup
+            numbers.append(device_rent_list[i]['count'])
+        fig3, ax3=plt.subplots()
+        ax3.bar(names,numbers)
+        #ax3.title('最受用户喜爱的设备')
+        plt.show()
+        canvas3 = fig3.canvas
+        buffer = io.BytesIO()
+        canvas3.print_png(buffer)
+        data3 = buffer.getvalue()
+        buffer.close()
+        resp3 = HttpResponse(data3)
+        resp3["Content-Type"] = "image/jpeg"
+        return resp3
+    else:
+        return HttpResponse({'error':'no valid parament'})

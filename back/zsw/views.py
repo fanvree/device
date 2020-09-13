@@ -26,7 +26,7 @@ def login(request):
 
         request.session['username'] = username
         request.session['is_login'] = True
-        add_dialog('用户%s登录系统'.format(username))
+        add_dialog('用户{}登录系统'.format(username))
         return JsonResponse({'state': 1, 'identity': models.User.objects.get(username=username).identity})
 
 
@@ -37,7 +37,7 @@ def logout(request):
             username = request.session['username']
             del request.session['is_login']
             del request.session['username']
-            add_dialog('用户%s登出系统'.format(username))
+            add_dialog('用户{}登出系统'.format(username))
             return JsonResponse({'state': 1})   # success
         else:                   # session_id不存在或被注销
             return JsonResponse({'state': 0})   # fail
@@ -68,7 +68,7 @@ def get_user(request):
             u['contact'] = user.contact
             u['email'] = user.email
             u_list.append(u)
-        add_dialog('管理员%s查看用户列表'.format(request.session['username']))
+        add_dialog('管理员{}查看用户列表'.format(request.session['username']))
         return JsonResponse({
             'total': total,
             'userlist': u_list,
@@ -102,7 +102,7 @@ def delete_user(request):
         for order in models.ShelfOrder.objects.filter(owner_name=username):
             models.ShelfOrder.objects.get(id=order.id).delete()
         models.User.objects.get(id=userid).delete()
-        add_dialog('管理员%s删除用户%s'.format(request.session['username'], username))
+        add_dialog('管理员{}删除用户{}'.format(request.session['username'], username))
         return JsonResponse({'ok': 'deleted'})
 
 
@@ -132,7 +132,7 @@ def set_user(request):
             identity_chinese = '设备提供者'
         else:
             identity_chinese = '管理员'
-        add_dialog('管理员%s设置用户%s的身份为%s'.format(request.session['username'], user.username, identity_chinese))
+        add_dialog('管理员{}设置用户{}的身份为{}'.format(request.session['username'], user.username, identity_chinese))
         return JsonResponse({'ok': 'set'})
 
 
@@ -170,7 +170,7 @@ def get_device(request):
             d['reason'] = device.reason
             d_list.append(d)
 
-        add_dialog('管理员%s查看设备列表'.format(request.session['username']))
+        add_dialog('管理员{}查看设备列表'.format(request.session['username']))
         return JsonResponse({
             'total': total,
             'devicelist': d_list,
@@ -203,7 +203,7 @@ def edit_device(request):
             if value != None:
                 setattr(device, key, value)
         device.save()
-        add_dialog('管理员%s修改设备%s'.format(request.session['username'], device.device_name))
+        add_dialog('管理员{}修改设备{}'.format(request.session['username'], device.device_name))
         return JsonResponse({'ok': 'edited'})
 
 
@@ -226,7 +226,7 @@ def delete_device(request):
         if device.valid == 'renting':
             return JsonResponse({'error': 'device is rented'})
 
-        add_dialog('管理员%删除设备%s'.format(request.session['username'], device_name))
+        add_dialog('管理员{}删除设备{}'.format(request.session['username'], device_name))
         # delete all the renting orders and shelf orders related to this device
         for order in models.RentingOrder.objects.filter(device_id=device_id):
             models.RentingOrder.objects.get(id=order.id).delete()
@@ -264,7 +264,7 @@ def get_shelf_device(request):
             d['reason'] = device.reason
             d_list.append(d)
 
-        add_dialog('用户%s查看所有上架设备'.format(request.session['username']))
+        add_dialog('用户{}查看所有上架设备'.format(request.session['username']))
         return JsonResponse({
             'total': total,
             'devicelist': d_list,
@@ -313,7 +313,7 @@ def order_device(request):
             rent_start=start_time,
             rent_end=start_time,
         )
-        add_dialog('用户%s申请租借设备%s'.format(username, models.Device.objects.get(id=device_id).device_name))
+        add_dialog('用户{}申请租借设备{}'.format(username, models.Device.objects.get(id=device_id).device_name))
         return JsonResponse({'ok': 'waiting for offer to agree the order'})
 
 
@@ -342,7 +342,7 @@ def get_order_history(request):
             o['state'] = order.valid
             o_list.append(o)
 
-        add_dialog('用户%s查看租借申请的历史记录'.format(username))
+        add_dialog('用户{}查看租借申请的历史记录'.format(username))
         return JsonResponse({
             'total': total,
             'orderlist': o_list,
@@ -369,7 +369,7 @@ def get_self_rented_device(request):
             d['time_to_expiration'] = time_delta.days
             device_list.append(d)
 
-        add_dialog('用户%s查看已经借到的设备'.format(username))
+        add_dialog('用户{}查看已经借到的设备'.format(username))
         return JsonResponse({
             'total': total,
             'devicelist': device_list,
@@ -390,7 +390,7 @@ def apply_to_be_offer(request):
         if user_id != models.User.objects.get(username=request.session['username']).id:
             return JsonResponse({'error': 'invalid user id'})
 
-        add_dialog('用户%s申请成为设备提供者'.format(request.session['username']))
+        add_dialog('用户{}申请成为设备提供者'.format(request.session['username']))
         models.ApplyOrder.objects.create(user_id=user_id, reason=reason, state='waiting')
         return JsonResponse({'ok': 'submitted'})
 
@@ -420,7 +420,7 @@ def get_device_reserved_info(request):
             o['due'] = str(order.due.year) + '-' + str(order.due.month) + '-' + str(order.due.day)
             o['contact'] = order.contact
             d['orderlist'].append(o)
-        add_dialog('用户%s查看设备%s的详细租借信息'.format(request.session['username'], d['devicename']))
+        add_dialog('用户{}查看设备{}的详细租借信息'.format(request.session['username'], d['devicename']))
         return JsonResponse(d)
 
 
@@ -461,7 +461,7 @@ def get_application_message(request):
             message_list.append(message)
         total = len(message_list)
 
-        add_dialog('用户%s查看用户升级申请消息回复'.format(request.session['username']))
+        add_dialog('用户{}查看用户升级申请消息回复'.format(request.session['username']))
         return JsonResponse({
             'total': total,
             'message_list': message_list
@@ -487,7 +487,7 @@ def get_renting_message(request):
             message_list.append(message)
         total = len(message_list)
 
-        add_dialog('用户%s查看个人租借申请消息回复'.format(username))
+        add_dialog('用户{}查看个人租借申请消息回复'.format(username))
         return JsonResponse({
             'total': total,
             'message_list': message_list
@@ -513,7 +513,7 @@ def get_shelf_message(request):
             message_list.append(message)
         total = len(message_list)
 
-        add_dialog('设备提供者%s查看个人设备上架申请消息回复'.format(username))
+        add_dialog('设备提供者{}查看个人设备上架申请消息回复'.format(username))
         return JsonResponse({
             'total': total,
             'message_list': message_list
@@ -537,7 +537,7 @@ def send_comment(request):
             content=content,
             time=time
         )
-        add_dialog('用户%s给用户%s留言'.format(username_from, username_to))
+        add_dialog('用户{}给用户{}留言'.format(username_from, username_to))
         return JsonResponse({'state': 1})
 
 
@@ -557,7 +557,7 @@ def receive_comment(request):
             comment_list.append(c)
         total = len(comment_list)
 
-        add_dialog('用户%s查看个人留言板'.format(username_to))
+        add_dialog('用户{}查看个人留言板'.format(username_to))
         return JsonResponse({
             'total': total,
             'comment_list': comment_list
