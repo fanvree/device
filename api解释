@@ -69,6 +69,7 @@ Method:GET
 URL:/boss/static
 QueryParam:
 {
+parament:0/1/2 #0 Device的统计 #1 User的统计 #2RentOrder的统计
 }
 Response:{
 'pie':'' #返回了设备状态的饼状图，返回形式是二进制流
