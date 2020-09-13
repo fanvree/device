@@ -29,6 +29,7 @@ QueryParam:
 	deviceid:'101'
 }
 Response:{
+	devicename:''
 	comment:[
           {'username': ,'judgement': ,'time':'2018.1.1'},
 ]
