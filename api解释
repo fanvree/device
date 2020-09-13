@@ -706,8 +706,7 @@ Method: POST
 Url: /comment/send
 Request:
 {
-	'userid_from': 101,
-	'userid_to': 102,
+	'username_to': 102,
 	'content': '',
 }
 Response:
