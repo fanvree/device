@@ -495,15 +495,13 @@ def get_shelf_message(request):
 # for all users: send comments to others
 def send_comment(request):
     if request.method == 'POST':
-        userid_from = request.POST.get('userid_from')
-        userid_to = request.POST.get('userid_to')
+        username_from = request.session['username']
+        username_to = request.POST.get('username_to')
         content = request.POST.get('content')
-        if not userid_from or not userid_to or not content:
+        if not username_from or not username_to or not content:
             return JsonResponse({'error': 'invalid parameters'})
-        if not models.User.objects.filter(id=userid_from).exists() or not models.User.objects.filter(id=userid_to).exists():
+        if not models.User.objects.filter(username=username_to).exists():
             return JsonResponse({'error': 'user non-existence or deleted'})
-        username_from = models.User.objects.get(id=userid_from).username
-        username_to = models.User.objects.get(id=userid_to).username
         time = datetime.now()
         models.Comment.objects.create(
             username_from=username_from,
@@ -521,7 +519,7 @@ def receive_comment(request):
         username_to = request.session['username']
         comment_list = []
         for comment in models.Comment.objects.filter(username_to=username_to):
-            if models.User.objects.filter(username=username_to):
+            if not models.User.objects.filter(username=username_to):
                 continue
             c = {}
             c['username_from'] = comment.username_from
