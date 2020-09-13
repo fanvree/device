@@ -57,7 +57,7 @@ def send_email(request):
 
 
 def add_dialog(content):
-    Dialog.objects.create(content=content)
+    Dialog.objects.create(content=content, time=datetime.now())
 
 
 # 完成注册
@@ -362,7 +362,8 @@ def list_judgement(request):
             item = {
                 'username': judgement.username,
                 'judgement': judgement.reason,
-                'time': judgement.time,
+                # 'time': judgement.time,
+                'time': judgement.time.strftime('%y-%m-%b %H:%M:%S'),
             }
             ret.append(item)
             total += 1
@@ -373,7 +374,7 @@ def list_judgement(request):
 def watch_dialog():
     total = 0
     ret = []
-    for dialog in Dialog:
-        ret.append(dialog.content)
+    for dialog in Dialog.objects.all():
+        ret.append({'content': dialog.content, 'time': dialog.time.strftime('%y-%m-%b %H:%M:%S')})
         total += 1
     return JsonResponse({'total': total, 'dialog': ret})
