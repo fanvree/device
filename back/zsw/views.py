@@ -452,8 +452,6 @@ def get_application_message(request):
         user = models.User.objects.get(username=username)
         message_list = []
         for order in models.ApplyOrder.objects.filter(user_id=user.id):
-            if not models.ApplyOrder.objects.filter(id=order.device_id).exists():
-                continue
             message = {}
             message['type'] = 'ApplyOrder'
             message['state'] = order.state
