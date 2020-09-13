@@ -21,7 +21,7 @@ def GetOrderList(request): #获得用户租借申请的列表
         elif valid == 'failed':
             order_list = models.RentingOrder.objects.filter(valid='failed')
         elif valid == 'waiting':
-            order_list = models.RentingOrder.objects.filter(valid='waited')
+            order_list = models.RentingOrder.objects.filter(valid='waiting')
         else:
             order_list = models.RentingOrder.objects.all()
 
