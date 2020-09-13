@@ -56,6 +56,10 @@ def send_email(request):
     return JsonResponse({'state': '0'})
 
 
+def add_dialog(content):
+    Dialog.objects.create(content=content)
+
+
 # 完成注册
 def logon(request):
     # print(request.POST)
@@ -326,6 +330,7 @@ def add_judgement(request):
 
 
 def send_judgement(request):
+    # return JsonResponse({'state': 1})
     if request.method == 'GET':
         device_id = int(request.GET['deviceid'])
         username = request.session['username']
@@ -348,10 +353,11 @@ def list_judgement(request):
         if device_id is None:
             return JsonResponse({'comment': {}})
         device_name = "设备已删除"
+        print(device_id)
         if Device.objects.filter(id=device_id).exists():
             device_name = Device.objects.get(id=device_id).device_name
         total = 0
-        for judgement in Judgement.objects.filter(device_id=device_id):
+        for judgement in Judgement.objects.filter(device_id=int(device_id)):
             item = {
                 'username': judgement.username,
                 'judgement': judgement.reason,
@@ -359,7 +365,7 @@ def list_judgement(request):
             }
             ret.append(item)
             total += 1
-        return JsonResponse({'comment': {ret}, 'devicename': device_name, 'total': total})
+        return JsonResponse({'comment': ret, 'devicename': device_name, 'total': total})
     pass
 
 
